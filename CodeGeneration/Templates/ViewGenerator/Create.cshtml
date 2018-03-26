@@ -1,0 +1,69 @@
+﻿@using CodeGeneration.Models.Metadata
+@using CodeGeneration.Models.Metadata.Model
+@inherits RazorEngine.Templating.TemplateBase<ModelMetadata>
+
+@@model @Model.ViewDataTypeName
+
+@Raw(Model.Header)
+
+<div class="row justify-content-center">
+    <div class="col-6">
+        <div class="card">
+            <div class="text-center">
+                <h4 class="card-header bg-secondary text-white">@Model.Title</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="@Model.ViewName">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @foreach (var property in Model.Properties)
+                    {
+                        var propertyAccessor = string.Format("{0}", property.PropertyName);
+
+                        if (property.IsPrimaryKey || property.IsReadOnly || !property.Scaffold) { continue; }
+                        if (property.IsForeignKey || !string.IsNullOrWhiteSpace(property.ItemSourceName))
+                        {
+                            var itemSourceName = string.Format("ViewBag.{0}", property.ItemSourceName);
+                            <div class="form-group">
+                                <label asp-for="@propertyAccessor"></label>
+                                <select asp-for="@propertyAccessor" class="form-control" asp-items="@itemSourceName"></select>
+                            </div>
+                        }
+                        else if (property.TypeName.Equals("System.Boolean"))
+                        {
+                            <div class="form-check">
+                                <input asp-for="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+                                <label asp-for="@propertyAccessor" class="form-check-label"></label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group">
+                                <label asp-for="@propertyAccessor"></label>
+                                <input asp-for="@propertyAccessor" class="form-control" />
+                                <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
+                            </div>
+                        }
+                    }
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-lg btn-block btn-success">
+                            <i class="fas fa-save"></i> Create
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <a asp-action="Index" class="btn btn-lg btn-block btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions
+{
+    static string GetValueExpression(PropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+}

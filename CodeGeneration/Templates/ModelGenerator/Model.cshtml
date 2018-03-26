@@ -1,0 +1,25 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<TableMetadata>
+using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace CodeGeneration.Models.Domain
+{
+    /// <summary>
+    /// Author: @AssemblyExtensions.Author()
+    /// Version: @AssemblyExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated model for the @Model.TableName table.
+    /// </summary>
+    public class @Model.TableName.ToCamelCase()
+    {
+    @foreach (var column in @Model.Columns)
+    {
+        var property = string.Format("public {0} {1} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.ColumnName);
+        @:@property
+    }
+    }
+}
