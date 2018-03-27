@@ -35,7 +35,6 @@ namespace CodeGeneration.Services.Generation.Model
             var schema = context.AppSettings.SqlGeneration.SourceSchema;
 
             var tableMetadata = _tableMetadataService.GetTableMetadata(connectionKey, database, schema);
-            var assembly = Assembly.GetExecutingAssembly();
 
             foreach (var metadata in tableMetadata)
             {
@@ -45,7 +44,7 @@ namespace CodeGeneration.Services.Generation.Model
                 if (!_modelCache.ContainsKey(modelName)) _modelCache.Add(modelName, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
                 var cache = _modelCache[modelName];
 
-                foreach (var resource in assembly.GetManifestResourceNames())
+                foreach (var resource in _razorTemplateService.GetEmbeddedTemplateNames(TemplateDirectory))
                 {
                     if (!resource.Contains(TemplateDirectory)) continue;
                     if (!resource.Contains(TemplateName)) continue;
@@ -69,8 +68,13 @@ namespace CodeGeneration.Services.Generation.Model
             }
         }
 
-        // TODO: Add a base generator service that implements the Get method because I think this logic will be same no matter the type of template (model, sql, etc.)
-        public string Get(string modelName, string templateName)
+        public IDictionary<string, IDictionary<string, string>> GetCache()
+        {
+            return _modelCache;
+        }
+
+        // TODO: Add a base generator service that implements the GetCache method because I think this logic will be same no matter the type of template (model, sql, etc.)
+        public string GetCachedResult(string modelName, string templateName)
         {
             if (!_modelCache.ContainsKey(modelName)) return string.Empty;
 
@@ -79,6 +83,11 @@ namespace CodeGeneration.Services.Generation.Model
             if (!cache.ContainsKey(templateName)) return string.Empty;
 
             return cache[templateName];
+        }
+
+        public string GetTemplate(string templateName)
+        {
+            return _razorTemplateService.ResolveTemplate(templateName);
         }
 
         private static string GetTemplateNameFromEmbeddedResource(string resource)

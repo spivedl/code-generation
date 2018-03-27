@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.GenerationContext;
-using CodeGeneration.Models.Metadata;
 using CodeGeneration.Models.Metadata.Model;
 using CodeGeneration.Services.Template.Razor;
 using NLog;
@@ -40,7 +40,17 @@ namespace CodeGeneration.Services.Generation.View
             }
         }
 
-        public string Get(string modelName, string templateName)
+        public IDictionary<string, IDictionary<string, string>> GetCache()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string GetCachedResult(string modelName, string templateName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string GetTemplate(string templateName)
         {
             throw new System.NotImplementedException();
         }

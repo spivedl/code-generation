@@ -2,7 +2,6 @@
 using CodeGeneration.Models.GenerationContext;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.Generation.Model;
-using CodeGeneration.Services.Generation.View;
 using NLog;
 
 namespace CodeGeneration.Services.Boot
@@ -12,14 +11,12 @@ namespace CodeGeneration.Services.Boot
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly AppSettings _appSettings;
         private readonly ITableMetadataService _tableMetadataService;
-        private readonly IViewGeneratorService _viewGeneratorService;
         private readonly IModelGeneratorService _modelGeneratorService;
 
-        public BootService(AppSettings appSettings, ITableMetadataService tableMetadataService, IViewGeneratorService viewGeneratorService, IModelGeneratorService modelGeneratorService)
+        public BootService(AppSettings appSettings, ITableMetadataService tableMetadataService, IModelGeneratorService modelGeneratorService)
         {
             _appSettings = appSettings;
             _tableMetadataService = tableMetadataService;
-            _viewGeneratorService = viewGeneratorService;
             _modelGeneratorService = modelGeneratorService;
         }
 
@@ -30,7 +27,9 @@ namespace CodeGeneration.Services.Boot
             //_viewGeneratorService.Generate(new ViewGenerationContext{ AppSettings = _appSettings});
             _tableMetadataService.GetTableMetadata("keeptime", _appSettings.SqlGeneration.SourceDatabase, _appSettings.SqlGeneration.SourceSchema);
             _modelGeneratorService.Generate(new ModelGenerationContext{AppSettings = _appSettings});
-            var test = _modelGeneratorService.Get("address", "model");
+
+            var cachedResult = _modelGeneratorService.GetCachedResult("address", "model");
+            var template = _modelGeneratorService.GetTemplate("Templates.ModelGenerator.Model");
         }
     }
 }

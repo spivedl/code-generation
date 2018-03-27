@@ -1,8 +1,13 @@
-﻿namespace CodeGeneration.Services.Generation
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace CodeGeneration.Services.Generation
 {
     public interface IGeneratorService<in T>
     {
         void Generate(T context);
-        string Get(string modelName, string templateName);
+        IDictionary<string, IDictionary<string, string>> GetCache();
+        string GetCachedResult(string modelName, string templateName);
+        string GetTemplate(string templateName);
     }
 }
