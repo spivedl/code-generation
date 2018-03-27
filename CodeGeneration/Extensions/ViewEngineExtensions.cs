@@ -3,7 +3,7 @@
 namespace CodeGeneration.Extensions
 {
     // TODO: Rename this class to something more appropriate
-    public static class AssemblyExtensions
+    public static class ViewEngineExtensions
     {
         public static string Version()
         {

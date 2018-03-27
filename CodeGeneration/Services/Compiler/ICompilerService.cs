@@ -3,8 +3,9 @@ using System.Collections.Generic;
 
 namespace CodeGeneration.Services.Compiler
 {
-    public interface ICompiler
+    public interface ICompilerService
     {
         IEnumerable<CompilerResults> CompileAssemblyFromSource(IEnumerable<string> sources);
+        CompilerResults CompileAssemblyFromSource(string source);
     }
 }

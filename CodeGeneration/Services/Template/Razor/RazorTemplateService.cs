@@ -34,6 +34,18 @@ namespace CodeGeneration.Services.Template.Razor
             return _assembly.GetManifestResourceNames();
         }
 
+        public IEnumerable<string> GetEmbeddedTemplateNames(IEnumerable<string> paths)
+        {
+            var names = new List<string>();
+
+            foreach (var path in paths)
+            {
+                names.AddRange(GetEmbeddedTemplateNames(path));
+            }
+
+            return names;
+        }
+
         public IEnumerable<string> GetEmbeddedTemplateNames(string path)
         {
             return _assembly.GetManifestResourceNames().Where(rn => rn.Contains(path));

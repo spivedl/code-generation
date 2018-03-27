@@ -94,8 +94,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Extensions\ViewEngineExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Models\Configuration\ModelGenerationOptions.cs" />
+    <Compile Include="Models\Configuration\ViewGenerationOptions.cs" />
+    <Compile Include="Models\GenerationContext\BaseGenerationContext.cs" />
     <Compile Include="Models\GenerationContext\ModelGenerationContext.cs" />
     <Compile Include="Models\Metadata\Model\ModelMetadata.cs" />
     <Compile Include="Models\Metadata\Model\PropertyMetadata.cs" />
@@ -113,7 +116,7 @@
     <Compile Include="Services\Boot\BootService.cs" />
     <Compile Include="Services\Boot\IBootService.cs" />
     <Compile Include="Services\Compiler\CSharpInMemoryCompiler.cs" />
-    <Compile Include="Services\Compiler\ICompiler.cs" />
+    <Compile Include="Services\Compiler\ICompilerService.cs" />
     <Compile Include="Services\Data\DataService.cs" />
     <Compile Include="Services\Data\IDataService.cs" />
     <Compile Include="Services\Data\ITableMetadataService.cs" />
@@ -122,6 +125,7 @@
     <Compile Include="Services\File\FileWriter.cs" />
     <Compile Include="Services\File\IFileReader.cs" />
     <Compile Include="Services\File\IFileWriter.cs" />
+    <Compile Include="Services\Generation\BaseGenerationService.cs" />
     <Compile Include="Services\Generation\IGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\IModelGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\ModelGeneratorService.cs" />

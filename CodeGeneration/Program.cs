@@ -31,7 +31,7 @@ namespace CodeGeneration
             container.RegisterType<TableMetadataService>().As<ITableMetadataService>().SingleInstance();
             container.RegisterType<FileReader>().As<IFileReader>().SingleInstance();
             container.RegisterType<FileWriter>().As<IFileWriter>().SingleInstance();
-            container.RegisterType<CSharpInMemoryCompiler>().As<ICompiler>().SingleInstance();
+            container.RegisterType<CSharpInMemoryCompiler>().As<ICompilerService>().SingleInstance();
             container.RegisterType<RazorTemplateService>().As<IRazorTemplateService>().SingleInstance();
             container.RegisterType<ViewGeneratorService>().As<IViewGeneratorService>().SingleInstance();
             container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();

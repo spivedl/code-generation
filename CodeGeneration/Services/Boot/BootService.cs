@@ -1,7 +1,7 @@
 ﻿using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.GenerationContext;
-using CodeGeneration.Services.Data;
 using CodeGeneration.Services.Generation.Model;
+using CodeGeneration.Services.Generation.View;
 using NLog;
 
 namespace CodeGeneration.Services.Boot
@@ -10,26 +10,27 @@ namespace CodeGeneration.Services.Boot
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly AppSettings _appSettings;
-        private readonly ITableMetadataService _tableMetadataService;
         private readonly IModelGeneratorService _modelGeneratorService;
+        private readonly IViewGeneratorService _viewGeneratorService;
 
-        public BootService(AppSettings appSettings, ITableMetadataService tableMetadataService, IModelGeneratorService modelGeneratorService)
+        public BootService(AppSettings appSettings, IModelGeneratorService modelGeneratorService, IViewGeneratorService viewGeneratorService)
         {
             _appSettings = appSettings;
-            _tableMetadataService = tableMetadataService;
             _modelGeneratorService = modelGeneratorService;
+            _viewGeneratorService = viewGeneratorService;
         }
 
         public void Run()
         {
             Logger.Info("Boot Service says hello!");
             
-            //_viewGeneratorService.Generate(new ViewGenerationContext{ AppSettings = _appSettings});
-            _tableMetadataService.GetTableMetadata("keeptime", _appSettings.SqlGeneration.SourceDatabase, _appSettings.SqlGeneration.SourceSchema);
-            _modelGeneratorService.Generate(new ModelGenerationContext{AppSettings = _appSettings});
-
+            _modelGeneratorService.Generate(new ModelGenerationContext{ AppSettings = _appSettings });
             var cachedResult = _modelGeneratorService.GetCachedResult("address", "model");
             var template = _modelGeneratorService.GetTemplate("Templates.ModelGenerator.Model");
+
+            _viewGeneratorService.Generate(new ViewGenerationContext { AppSettings = _appSettings });
+            cachedResult = _viewGeneratorService.GetCachedResult("address", "model");
+            template = _viewGeneratorService.GetTemplate("Templates.ModelGenerator.Model");
         }
     }
 }

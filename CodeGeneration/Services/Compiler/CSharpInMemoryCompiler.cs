@@ -6,7 +6,7 @@ using NLog;
 
 namespace CodeGeneration.Services.Compiler
 {
-    public class CSharpInMemoryCompiler : ICompiler
+    public class CSharpInMemoryCompiler : ICompilerService
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly CSharpCodeProvider _codeProvider;
@@ -24,13 +24,16 @@ namespace CodeGeneration.Services.Compiler
 
             _compilerParameters.ReferencedAssemblies.Add("mscorlib.dll");
             _compilerParameters.ReferencedAssemblies.Add("System.dll");
-            //compilerParameters.ReferencedAssemblies.Add("System.ComponentModel.Annotations.dll");
-            //compilerParameters.ReferencedAssemblies.Add("System.ComponentModel.DataAnnotations.dll");
         }
 
         public IEnumerable<CompilerResults> CompileAssemblyFromSource(IEnumerable<string> sources)
         {
             return sources.Select(sourceCode => _codeProvider.CompileAssemblyFromSource(_compilerParameters, sourceCode)).ToList();
+        }
+
+        public CompilerResults CompileAssemblyFromSource(string source)
+        {
+            return _codeProvider.CompileAssemblyFromSource(_compilerParameters, source);
         }
     }
 }
