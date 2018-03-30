@@ -1,12 +1,14 @@
 ﻿using System.IO;
 using Autofac;
-using Autofac.Builder;
 using CodeGeneration.Models.Configuration;
+using CodeGeneration.Modules;
 using CodeGeneration.Services.Boot;
+using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Compiler;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
 using CodeGeneration.Services.Generation.Model;
+using CodeGeneration.Services.Generation.Sql;
 using CodeGeneration.Services.Generation.View;
 using CodeGeneration.Services.Template.Razor;
 using Microsoft.Extensions.Configuration;
@@ -24,17 +26,22 @@ namespace CodeGeneration
             var configuration = BuildConfiguration(args);
             var appSettings = BindAppSettings(configuration);
 
-            // register services with container
+            // register configuration and ApplicationOptions with container
             container.RegisterInstance(configuration).As<IConfiguration>().SingleInstance();
-            container.RegisterInstance(appSettings).As<AppSettings>().SingleInstance();
+            container.RegisterInstance(appSettings).As<ApplicationOptions>().SingleInstance();
+
+            // register services with container
+            container.RegisterModule<CachingModule>();
+            container.RegisterType<MemoryCacheService>().As<ICacheService>();
             container.RegisterType<DataService>().As<IDataService>().SingleInstance();
             container.RegisterType<TableMetadataService>().As<ITableMetadataService>().SingleInstance();
             container.RegisterType<FileReader>().As<IFileReader>().SingleInstance();
             container.RegisterType<FileWriter>().As<IFileWriter>().SingleInstance();
             container.RegisterType<CSharpInMemoryCompiler>().As<ICompilerService>().SingleInstance();
             container.RegisterType<RazorTemplateService>().As<IRazorTemplateService>().SingleInstance();
-            container.RegisterType<ViewGeneratorService>().As<IViewGeneratorService>().SingleInstance();
             container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();
+            container.RegisterType<ViewGeneratorService>().As<IViewGeneratorService>().SingleInstance();
+            container.RegisterType<SqlGeneratorService>().As<ISqlGeneratorService>().SingleInstance();
             container.RegisterType<BootService>().As<IBootService>().SingleInstance();
 
             using (var scope = container.Build().BeginLifetimeScope())
@@ -53,11 +60,11 @@ namespace CodeGeneration
                 .Build();
         }
 
-        private static AppSettings BindAppSettings(IConfiguration configuration)
+        private static ApplicationOptions BindAppSettings(IConfiguration configuration)
         {
-            var appSettings = new AppSettings();
+            var appSettings = new ApplicationOptions();
 
-            configuration.GetSection("App").Bind(appSettings);
+            configuration.GetSection("Application").Bind(appSettings);
 
             return appSettings;
         }

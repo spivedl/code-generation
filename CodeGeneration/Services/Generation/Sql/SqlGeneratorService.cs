@@ -9,9 +9,9 @@ using CodeGeneration.Services.File;
 using CodeGeneration.Services.Template.Razor;
 using NLog;
 
-namespace CodeGeneration.Services.Generation.Model
+namespace CodeGeneration.Services.Generation.Sql
 {
-    public class ModelGeneratorService : IModelGeneratorService
+    public class SqlGeneratorService : ISqlGeneratorService
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITableMetadataService _tableMetadataService;
@@ -19,7 +19,7 @@ namespace CodeGeneration.Services.Generation.Model
         private readonly ICacheService _cacheService;
         private readonly IFileWriter _fileWriter;
 
-        public ModelGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter) 
+        public SqlGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter) 
         {
             _tableMetadataService = tableMetadataService;
             _razorTemplateService = razorTemplateService;
@@ -27,9 +27,9 @@ namespace CodeGeneration.Services.Generation.Model
             _fileWriter = fileWriter;
         }
 
-        public void Generate(ModelGenerationContext context)
+        public void Generate(SqlGenerationContext context)
         {
-            var options = context.ApplicationOptions.ModelGeneration;
+            var options = context.ApplicationOptions.SqlGeneration;
             var connectionKey = context.ApplicationOptions.SourceConnectionKey;
             var database = context.ApplicationOptions.SourceDatabase;
             var schema = context.ApplicationOptions.SourceSchema;
@@ -47,6 +47,7 @@ namespace CodeGeneration.Services.Generation.Model
                     var razorEngineKey = resource.ToRazorEngineKey();
                     var fileName = resource.ToFileName();
                     var templateName = resource.ToTemplateName();
+                    var cacheKey = _cacheService.BuildCacheKey(modelName, templateName);
 
                     Logger.Info("Model Name: {0}", modelName);
                     Logger.Info("Embedded resource: {0}", resource);
@@ -55,31 +56,31 @@ namespace CodeGeneration.Services.Generation.Model
                     Logger.Info("Template Name: {0}", templateName);
 
                     string parsedCode;
-                    if (_cacheService.Exists(modelName))
+                    if (_cacheService.Exists(cacheKey))
                     {
-                        Logger.Info("[CACHE HIT]: Model code for {0} found in cache.", modelName);
-                        parsedCode = _cacheService.Get<string>(modelName);
+                        Logger.Info("[CACHE HIT]: Sql code for {0} found in cache.", cacheKey);
+                        parsedCode = _cacheService.Get<string>(cacheKey);
                     }
                     else
                     {
-                        Logger.Info("[CACHE MISS]: Model code for {0} NOT found in cache. Will process template and add to cache.", modelName);
+                        Logger.Info("[CACHE MISS]: Sql code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
                         parsedCode = _razorTemplateService.Process(razorEngineKey, table);
-                        _cacheService.Set(modelName, parsedCode);
+                        _cacheService.Set(cacheKey, parsedCode);
                     }
 
-                    if(options.Output.GenerateOutput) WriteToFile(options.Output, modelName, parsedCode);
+                    if(options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedCode);
                 }
             }
         }
 
-        private void WriteToFile(OutputOptions options, string modelName, string contents)
+        private void WriteToFile(OutputOptions options, string modelName, string templateName, string contents)
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName), extension);
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName, templateName), extension);
 
-            Logger.Info("Writing generated MODEL to output file at '{0}'.", fullPath);
+            Logger.Info("Writing generated SQL to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);
         }
 

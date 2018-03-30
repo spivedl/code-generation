@@ -1,4 +1,4 @@
-﻿using CodeGeneration.Models.GenerationContext;
+﻿using CodeGeneration.Models.Context;
 
 namespace CodeGeneration.Services.Generation.Model
 {

@@ -1,6 +1,6 @@
 ﻿namespace CodeGeneration.Models.Configuration
 {
-    public class AppSettings
+    public class ApplicationOptions
     {
         public bool GenerateModels { get; set; }
         public bool GenerateControllers { get; set; }
@@ -13,13 +13,16 @@
         public string TargetConnectionKey { get; set; }
         public string TargetDatabase { get; set; }
         public string TargetSchema { get; set; }
+        public string[] ReadOnlyProperties { get; set; }
         public ModelGenerationOptions ModelGeneration { get; set; }
         public ViewGenerationOptions ViewGeneration { get; set; }
+        public SqlGenerationOptions SqlGeneration { get; set; }
 
-        public AppSettings()
+        public ApplicationOptions()
         {
             ModelGeneration = new ModelGenerationOptions();
             ViewGeneration = new ViewGenerationOptions();
+            SqlGeneration = new SqlGenerationOptions();
         }
     }
 }

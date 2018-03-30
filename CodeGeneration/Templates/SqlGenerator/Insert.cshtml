@@ -1,0 +1,82 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<TableMetadata>
+
+RAISERROR('Creating stored procedure [@Model.Schema].[sp_insert_@Model.TableName]', 10, 1)
+
+USE [@Model.Database]
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.Schema].[sp_insert_@Model.TableName]') AND type in (N'P', N'PC'))
+BEGIN
+DROP PROCEDURE [@Model.Schema].[sp_insert_@Model.TableName]
+END
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Version:		@RazorEngineExtensions.Version()
+-- Author:		@RazorEngineExtensions.Author()
+-- Create date: @DateTime.Now.ToString("f")
+-- Description:	Auto-generated INSERT stored procedure for the [@Model.Schema].[@Model.TableName] table.
+-- =============================================
+CREATE PROCEDURE [@Model.Schema].[sp_insert_@Model.TableName]
+@foreach (var column in @Model.Columns)
+{
+    if (column.IsPrimaryKey || column.IsReadOnly) { continue; }
+    @* This logic depends on the Columns being sorted by their OrdinalPostion *@
+    if (column.OrdinalPosition > 2)
+    {
+    @:, @column.GetParameterString()
+    }
+    else
+    {
+    @:@column.GetParameterString()
+    }
+}
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+    INSERT INTO [@Model.Schema].[@Model.TableName]
+    (
+@foreach (var column in @Model.Columns)
+{
+    if (column.IsPrimaryKey || column.IsReadOnly) { continue; }
+    if (column.OrdinalPosition > 2)
+    {
+        @:, [@column.ColumnName]
+    }
+    else
+    {
+        @:[@column.ColumnName]
+    }
+}
+    )
+    VALUES
+    (
+@foreach (var column in @Model.Columns)
+{
+    if (column.IsPrimaryKey || column.IsReadOnly) { continue; }
+    if (column.OrdinalPosition > 2)
+    {
+        @:, @@@column.ColumnName
+    }
+    else
+    {
+        @:@@@column.ColumnName
+    }
+}
+    );
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
+
+END
+GO
+
+-------------------------------------------------------------------------------------------------------------------------------

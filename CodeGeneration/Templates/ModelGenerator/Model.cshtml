@@ -1,16 +1,16 @@
 ﻿@using System
-@using System.Linq
 @using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<TableMetadata>
+
 using System;
 using CodeGeneration.Models.Domain.Attributes;
 
 namespace CodeGeneration.Models.Domain
 {
     /// <summary>
-    /// Author: @ViewEngineExtensions.Author()
-    /// Version: @ViewEngineExtensions.Version()
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
     /// Create Date: @DateTime.Now.ToString("f")
     /// Description: Auto-generated model for the @Model.TableName table.
     /// </summary>
@@ -18,15 +18,17 @@ namespace CodeGeneration.Models.Domain
     {
     @foreach (var column in @Model.Columns)
     {
-        if (column.IsPrimaryKey) {
+        if (column.IsPrimaryKey){
         @:[PrimaryKey]
         }
-        if (Model.Relationships.Exists(r => r.SourceColumnName.Equals(column.ColumnName) && r.SourceTableName.Equals(Model.TableName)))
-        {
-        @:@Raw(string.Format("[ForeignKey(\"{0}List\")]", column.ColumnName.Replace("Id","")))
+        if (column.IsForeignKey){
+        @:@Raw(string.Format("[ForeignKey(\"{0}List\")]", column.ColumnName.Replace("Id", "")))
         }
-        @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited()));
-        @:@string.Format("public {0} {1} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.ColumnName);
+        if (column.IsReadOnly){
+        @:[ReadOnly]
+        }
+        @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited()))
+        @:@string.Format("public {0} {1} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.ColumnName)
     }
     }
 }

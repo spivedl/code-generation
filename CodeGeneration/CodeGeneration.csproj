@@ -79,6 +79,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.4.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
@@ -94,15 +95,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\ViewEngineExtensions.cs" />
+    <Compile Include="Extensions\RazorEngineExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Models\Configuration\SqlGenerationOptions.cs" />
     <Compile Include="Models\Configuration\ModelGenerationOptions.cs" />
+    <Compile Include="Models\Configuration\OutputOptions.cs" />
     <Compile Include="Models\Configuration\ViewGenerationOptions.cs" />
-    <Compile Include="Models\GenerationContext\BaseGenerationContext.cs" />
-    <Compile Include="Models\GenerationContext\ModelGenerationContext.cs" />
+    <Compile Include="Models\Context\BaseGenerationContext.cs" />
+    <Compile Include="Models\Context\SqlGenerationContext.cs" />
+    <Compile Include="Models\Context\ModelGenerationContext.cs" />
+    <Compile Include="Models\Context\TableMetadataContext.cs" />
     <Compile Include="Models\Metadata\Model\ModelMetadata.cs" />
     <Compile Include="Models\Metadata\Model\PropertyMetadata.cs" />
-    <Compile Include="Models\Configuration\AppSettings.cs" />
+    <Compile Include="Models\Configuration\ApplicationOptions.cs" />
     <Compile Include="Models\Domain\Attributes\DisplayNameAttribute.cs" />
     <Compile Include="Models\Domain\Attributes\ForeignKeyAttribute.cs" />
     <Compile Include="Models\Domain\Attributes\PrimaryKeyAttribute.cs" />
@@ -111,10 +116,15 @@
     <Compile Include="Models\Metadata\Sql\ColumnMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\RelationshipMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\TableMetadata.cs" />
+    <Compile Include="Models\Metadata\Template\TemplateMetadata.cs" />
+    <Compile Include="Modules\CachingModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Boot\BootService.cs" />
     <Compile Include="Services\Boot\IBootService.cs" />
+    <Compile Include="Services\Cache\MemoryCacheService.cs" />
+    <Compile Include="Services\Cache\ICacheService.cs" />
+    <Compile Include="Services\Compiler\CompilerErrorException.cs" />
     <Compile Include="Services\Compiler\CSharpInMemoryCompiler.cs" />
     <Compile Include="Services\Compiler\ICompilerService.cs" />
     <Compile Include="Services\Data\DataService.cs" />
@@ -125,12 +135,13 @@
     <Compile Include="Services\File\FileWriter.cs" />
     <Compile Include="Services\File\IFileReader.cs" />
     <Compile Include="Services\File\IFileWriter.cs" />
-    <Compile Include="Services\Generation\BaseGenerationService.cs" />
     <Compile Include="Services\Generation\IGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\IModelGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\ModelGeneratorService.cs" />
+    <Compile Include="Services\Generation\Sql\ISqlGeneratorService.cs" />
+    <Compile Include="Services\Generation\Sql\SqlGeneratorService.cs" />
     <Compile Include="Services\Generation\View\IViewGeneratorService.cs" />
-    <Compile Include="Models\GenerationContext\ViewGenerationContext.cs" />
+    <Compile Include="Models\Context\ViewGenerationContext.cs" />
     <Compile Include="Services\Generation\View\ViewGeneratorService.cs" />
     <Compile Include="Services\Template\Razor\IRazorTemplateService.cs" />
     <Compile Include="Services\Template\ITemplateService.cs" />
@@ -143,7 +154,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
@@ -151,15 +162,19 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Templates\ViewGenerator\Create.cshtml" />
     <EmbeddedResource Include="Templates\ModelGenerator\Model.cshtml" />
+    <EmbeddedResource Include="Templates\ViewGenerator\Edit.cshtml" />
+    <EmbeddedResource Include="Templates\SqlGenerator\Search.cshtml" />
+    <EmbeddedResource Include="Templates\SqlGenerator\Delete.cshtml" />
+    <EmbeddedResource Include="Templates\SqlGenerator\Update.cshtml" />
+    <EmbeddedResource Include="Templates\SqlGenerator\Insert.cshtml" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Output\" />
     <Folder Include="Services\Generation\Controller\" />
     <Folder Include="Services\Generation\Repository\" />
-    <Folder Include="Services\Generation\Sql\" />
     <Folder Include="Templates\ControllerGenerator\" />
     <Folder Include="Templates\RepositoryGenerator\" />
-    <Folder Include="Templates\SqlGenerator\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

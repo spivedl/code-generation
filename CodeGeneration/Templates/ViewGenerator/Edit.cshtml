@@ -16,7 +16,12 @@
                     {
                         var propertyAccessor = string.Format("{0}", property.PropertyName);
 
-                        if (property.IsPrimaryKey || property.IsReadOnly || !property.Scaffold) { continue; }
+                        if (property.IsReadOnly || !property.Scaffold) { continue; }
+                        if (property.IsPrimaryKey)
+                        {
+                            <input type="hidden" asp-for="@propertyAccessor"/>
+                            continue;
+                        }
                         if (property.IsForeignKey || !string.IsNullOrWhiteSpace(property.ItemSourceName))
                         {
                             var itemSourceName = string.Format("ViewBag.{0}", property.ItemSourceName);
