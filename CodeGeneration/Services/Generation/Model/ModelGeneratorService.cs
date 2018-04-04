@@ -29,6 +29,12 @@ namespace CodeGeneration.Services.Generation.Model
 
         public void Generate(ModelGenerationContext context)
         {
+            if (!context.ApplicationOptions.GenerateModels)
+            {
+                Logger.Info("Model generation is disabled. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
             var options = context.ApplicationOptions.ModelGeneration;
             var connectionKey = context.ApplicationOptions.SourceConnectionKey;
             var database = context.ApplicationOptions.SourceDatabase;
@@ -36,22 +42,19 @@ namespace CodeGeneration.Services.Generation.Model
             var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
 
             var tableMetadata = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
-            foreach (var table in tableMetadata)
+            foreach (var resource in embeddedResources)
             {
-                var modelName = table.TableName.ToCamelCase();
-                var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
-
-                foreach (var resource in embeddedResources)
+                foreach (var table in tableMetadata)
                 {
+                    var modelName = table.TableName.ToCamelCase();
                     var razorEngineKey = resource.ToRazorEngineKey();
-                    var fileName = resource.ToFileName();
                     var templateName = resource.ToTemplateName();
 
                     Logger.Info("Model Name: {0}", modelName);
                     Logger.Info("Embedded resource: {0}", resource);
                     Logger.Info("Razor Engine Key: {0}", razorEngineKey);
-                    Logger.Info("File Name: {0}", fileName);
                     Logger.Info("Template Name: {0}", templateName);
 
                     string parsedCode;
@@ -68,7 +71,7 @@ namespace CodeGeneration.Services.Generation.Model
                         _cacheService.Set(modelName, parsedCode);
                     }
 
-                    if(options.Output.GenerateOutput) WriteToFile(options.Output, modelName, parsedCode);
+                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, parsedCode);
                 }
             }
         }

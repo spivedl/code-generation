@@ -5,8 +5,9 @@
 @inherits RazorEngine.Templating.TemplateBase<TableMetadata>
 
 @{
-    var primaryColumn = Model.Columns.FirstOrDefault(c => c.IsPrimaryKey);
-    var primaryColumnName = primaryColumn != null ? primaryColumn.ColumnName : string.Format("{0}Id", Model.TableName);
+    var primaryKeyColumn = Model.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+    var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", Model.TableName);
+    var hasModifiedDateColumn = Model.Columns.Exists(c => c.ColumnName.Equals("ModifiedDate"));
 }
 
 RAISERROR('Creating stored procedure [@Model.Schema].[sp_update_@Model.TableName]', 10, 1)
@@ -62,7 +63,11 @@ BEGIN
     @:SET [@column.ColumnName] = @@@column.ColumnName
         }
     }
-    WHERE [@primaryColumnName] = @@@primaryColumnName
+    @if (hasModifiedDateColumn)
+    {
+    @:, [ModifiedDate] = GETDATE()
+    }
+    WHERE [@primaryKeyColumnName] = @@@primaryKeyColumnName
 
 END
 GO

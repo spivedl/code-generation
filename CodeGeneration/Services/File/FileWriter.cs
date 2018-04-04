@@ -42,6 +42,25 @@ namespace CodeGeneration.Services.File
             }
         }
 
+        public void WriteLines(string path, string contents, bool append = false)
+        {
+            try
+            {
+                CheckDirectory(path);
+                LogContents(path, contents);
+
+                using (var file = new StreamWriter(path, append))
+                {
+                    file.WriteLine(contents);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, $"Error writing file at '{path}'.");
+                throw;
+            }
+        }
+
         public void WriteLines(string path, IEnumerable<string> contents, bool append)
         {
             try

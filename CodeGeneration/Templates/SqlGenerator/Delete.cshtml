@@ -1,1 +1,47 @@
-﻿
+﻿@using System
+@using System.Linq
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<TableMetadata>
+
+@{
+    var primaryKeyColumn = @Model.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+    var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", Model.TableName);
+}
+
+RAISERROR('Creating stored procedure [@Model.Schema].[sp_delete_@Model.TableName]', 10, 1)
+
+USE [@Model.Database]
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.Schema].[sp_delete_@Model.TableName]') AND type in (N'P', N'PC'))
+BEGIN
+DROP PROCEDURE [@Model.Schema].[sp_delete_@Model.TableName]
+END
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Version:		@RazorEngineExtensions.Version()
+-- Author:		@RazorEngineExtensions.Author()
+-- Create date: @DateTime.Now.ToString("f")
+-- Description:	Auto-generated DELETE stored procedure for table [@Model.Schema].[@Model.TableName].
+-- =============================================
+CREATE PROCEDURE [@Model.Schema].[sp_delete_@Model.TableName]
+@@@primaryKeyColumnName INT
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+    DELETE
+    FROM [@Model.Schema].[@Model.TableName]
+    WHERE [@primaryKeyColumnName] = @@@primaryKeyColumnName
+
+END
+GO
+
+-------------------------------------------------------------------------------------------------------------------------------

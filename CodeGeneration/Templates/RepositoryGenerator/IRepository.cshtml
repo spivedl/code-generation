@@ -1,0 +1,13 @@
+﻿@using CodeGeneration.Models.Metadata.Model
+@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+using System;
+
+@{
+    var modelName = (Model.ViewDataTypeShortName);
+}
+namespace CodeGeneration.Repositories.Interfaces
+{
+    public interface I@(modelName)Repository : ICrudRepository<@modelName>
+    {
+    }
+}

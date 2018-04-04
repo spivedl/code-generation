@@ -17,12 +17,16 @@
         public ModelGenerationOptions ModelGeneration { get; set; }
         public ViewGenerationOptions ViewGeneration { get; set; }
         public SqlGenerationOptions SqlGeneration { get; set; }
+        public ControllerGenerationOptions ControllerGeneration { get; set; }
+        public RepositoryGenerationOptions RepositoryGeneration { get; set; }
 
         public ApplicationOptions()
         {
             ModelGeneration = new ModelGenerationOptions();
             ViewGeneration = new ViewGenerationOptions();
             SqlGeneration = new SqlGenerationOptions();
+            ControllerGeneration = new ControllerGenerationOptions();
+            RepositoryGeneration = new RepositoryGenerationOptions();
         }
     }
 }

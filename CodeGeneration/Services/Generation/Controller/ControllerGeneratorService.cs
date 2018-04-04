@@ -11,9 +11,9 @@ using CodeGeneration.Services.Generation.Model;
 using CodeGeneration.Services.Template.Razor;
 using NLog;
 
-namespace CodeGeneration.Services.Generation.View
+namespace CodeGeneration.Services.Generation.Controller
 {
-    public class ViewGeneratorService : IViewGeneratorService
+    public class ControllerGeneratorService : IControllerGeneratorService
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ICacheService _cacheService;
@@ -22,7 +22,7 @@ namespace CodeGeneration.Services.Generation.View
         private readonly ICompilerService _compilerService;
         private readonly IFileWriter _fileWriter;
 
-        public ViewGeneratorService(ICacheService cacheService, IRazorTemplateService razorTemplateService, IModelGeneratorService modelGeneratorService, ICompilerService compilerService, IFileWriter fileWriter)
+        public ControllerGeneratorService(ICacheService cacheService, IRazorTemplateService razorTemplateService, IModelGeneratorService modelGeneratorService, ICompilerService compilerService, IFileWriter fileWriter)
         {
             _razorTemplateService = razorTemplateService;
             _modelGeneratorService = modelGeneratorService;
@@ -31,15 +31,15 @@ namespace CodeGeneration.Services.Generation.View
             _cacheService = cacheService;
         }
 
-        public void Generate(ViewGenerationContext context)
+        public void Generate(ControllerGenerationContext context)
         {
-            if (!context.ApplicationOptions.GenerateViews)
+            if (!context.ApplicationOptions.GenerateControllers)
             {
-                Logger.Info("View generation is disabled. Change the 'GenerateViews' option in the 'appsettings.json' file to enable.");
+                Logger.Info("Controller generation is disabled. Change the 'GenerateControllers' option in the 'appsettings.json' file to enable.");
                 return;
             }
 
-            var options = context.ApplicationOptions.ViewGeneration;
+            var options = context.ApplicationOptions.ControllerGeneration;
 
             var modelCache = _modelGeneratorService.GetCache();
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
@@ -66,12 +66,12 @@ namespace CodeGeneration.Services.Generation.View
                     string parsedCode;
                     if (_cacheService.Exists(cacheKey))
                     {
-                        Logger.Info("[CACHE HIT]: View code for {0} found in cache.", cacheKey);
+                        Logger.Info("[CACHE HIT]: Controller code for {0} found in cache.", cacheKey);
                         parsedCode = _cacheService.Get<string>(cacheKey);
                     }
                     else
                     {
-                        Logger.Info("[CACHE MISS]: View code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
+                        Logger.Info("[CACHE MISS]: Controller code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
                         parsedCode = _razorTemplateService.Process(razorEngineKey, templateModel);
                         _cacheService.Set(cacheKey, parsedCode);
@@ -86,9 +86,10 @@ namespace CodeGeneration.Services.Generation.View
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName, templateName), extension);
+            var className = $"{modelName}{templateName}";
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, className), extension);
 
-            Logger.Info("Writing generated VIEW to output file at '{0}'.", fullPath);
+            Logger.Info("Writing generated CONTROLLER to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);
         }
 

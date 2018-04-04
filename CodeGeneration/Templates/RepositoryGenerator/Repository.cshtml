@@ -1,0 +1,136 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Model
+@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+@{
+    var modelName = (Model.ViewDataTypeShortName);
+    var modelNameLower = Char.ToLowerInvariant(modelName[0]) + modelName.Substring(1);
+    var tableName = (Model.ViewDataTypeShortName.ToDelimited("_").ToLowerInvariant());
+}
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using Dapper;
+using CodeGeneration.Models.@modelName;
+using CodeGeneration.Repositories.Interfaces;
+using CodeGeneration.Services.Data;
+
+namespace CodeGeneration.Repositories.Dapper
+{
+    /// <inheritdoc />
+    /// <summary>
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated repository for the @modelName model.
+    /// </summary>
+    public class @(modelName)Repository : I@(modelName)Repository
+    {
+        private readonly IDataService _dataService;
+
+        private IDbConnection Connection => _dataService.GetConnection("keeptime");
+
+        public @(modelName)Repository(IDataService dataService)
+        {
+            _dataService = dataService;
+        }
+
+        public @modelName Create(@modelName item)
+        {
+            const string storedProcedure = @@"[main].[sp_insert_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                item.@(modelName)Id = connection.QuerySingle<int>(
+                    storedProcedure,
+                    new
+                    {
+                    @foreach (var prop in @Model.Properties)
+                    {
+                        if (prop.IsPrimaryKey || prop.IsReadOnly) { continue; }
+                        @:item.@(prop.PropertyName),
+                    }
+                    },
+                    commandType: CommandType.StoredProcedure);
+
+                return item;
+            }
+        }
+
+        public @modelName Edit(@modelName item)
+        {
+            const string storedProcedure = @@"[main].[sp_update_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                connection.Execute(
+                    storedProcedure,
+                    new
+                    {
+                    @foreach (var prop in @Model.Properties)
+                    {
+                        if (prop.IsReadOnly) { continue; }
+                        @:item.@(prop.PropertyName),
+                    }
+                    },
+                    commandType: CommandType.StoredProcedure);
+
+            return item;
+            }
+        }
+
+        public int Delete(int @(modelNameLower)Id)
+        {
+            const string storedProcedure = @@"[main].[sp_delete_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                return connection.Execute(storedProcedure, new { @(modelName)Id = @(modelNameLower)Id }, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public int DeleteAll()
+        {
+            const string storedProcedure = "[main].[sp_delete_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                return connection.Execute(storedProcedure, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public @modelName FindOne(int @(modelNameLower)Id)
+        {
+            const string storedProcedure = @@"[main].[sp_search_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                return connection.QuerySingle<@modelName>(storedProcedure, new { @(modelName)Id = @(modelNameLower)Id }, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public IEnumerable<@modelName> FindAll()
+        {
+            const string storedProcedure = @@"[main].[sp_search_@tableName]";
+
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+
+                return connection.Query<@modelName>(storedProcedure, commandType: CommandType.StoredProcedure);
+            }
+        }
+    }
+}

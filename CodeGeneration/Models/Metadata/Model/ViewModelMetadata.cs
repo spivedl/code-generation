@@ -5,7 +5,7 @@ using CodeGeneration.Models.Domain.Attributes;
 
 namespace CodeGeneration.Models.Metadata.Model
 {
-    public class ModelMetadata
+    public class ViewModelMetadata
     {
         public bool IsPartialView { get; set; }
         public bool IsLayoutPageSelected { get; set; }
@@ -18,15 +18,15 @@ namespace CodeGeneration.Models.Metadata.Model
 
         public ISet<PropertyMetadata> Properties { get; set; }
 
-        public ModelMetadata(Type model) : this(false, true, null, "", model)
+        public ViewModelMetadata(Type model) : this(false, true, null, "", model)
         {
         }
 
-        public ModelMetadata(string viewName, Type model) : this(false, true, null, viewName, model)
+        public ViewModelMetadata(string viewName, Type model) : this(false, true, null, viewName, model)
         {
         }
 
-        public ModelMetadata(bool isPartialView, bool isLayoutPageSelected, string layoutPageFile, string viewName, Type model)
+        public ViewModelMetadata(bool isPartialView, bool isLayoutPageSelected, string layoutPageFile, string viewName, Type model)
         {
             IsPartialView = isPartialView;
             IsLayoutPageSelected = isLayoutPageSelected;
@@ -36,8 +36,6 @@ namespace CodeGeneration.Models.Metadata.Model
             ViewDataTypeShortName = model.Name;
             Title = $"{viewName} {model.Name}";
             Properties = GetProperties(model);
-
-            //Header = DetermineHeader(IsPartialView, IsLayoutPageSelected, LayoutPageFile, Title);
         }
 
         private static ISet<PropertyMetadata> GetProperties(Type model)
@@ -70,43 +68,5 @@ namespace CodeGeneration.Models.Metadata.Model
 
             return set;
         }
-
-        /*private static string DetermineHeader(bool isPartialView, bool isLayoutPageSelected, string layoutPageFile, string title)
-        {
-            if (isPartialView) return "";
-
-            var sb = new StringBuilder();
-            if (isLayoutPageSelected)
-            {
-                sb
-                    .AppendLine("@{")
-                    .AppendLine($"\tViewData[\"Title\"] = \"{title}\";");
-
-                if (!string.IsNullOrWhiteSpace(layoutPageFile))
-                {
-                    sb.AppendLine($"\tLayout = \"{layoutPageFile}\";");
-                }
-
-                sb.AppendLine("}");
-            }
-            else
-            {
-                sb
-                    .AppendLine("@{")
-                    .AppendLine("\tLayout = null;")
-                    .AppendLine("}")
-                    .AppendLine()
-                    .AppendLine("<!DOCTYPE html>")
-                    .AppendLine()
-                    .AppendLine("<html>")
-                    .AppendLine("<head>")
-                    .AppendLine("\t<meta name=\"viewport\" content=\"width=device-width\"/>")
-                    .AppendLine($"\t<title>{title}</title>")
-                    .AppendLine("</head>")
-                    .AppendLine("<body>");
-            }
-
-            return sb.ToString();
-        }*/
     }
 }

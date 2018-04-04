@@ -1,12 +1,12 @@
 ﻿namespace CodeGeneration.Models.Configuration
 {
-    public class ModelGenerationOptions
+    public class RepositoryGenerationOptions
     {
         public string[] TemplateDirectories { get; set; }
         public string[] TemplateNames { get; set; }
         public OutputOptions Output { get; set; }
 
-        public ModelGenerationOptions()
+        public RepositoryGenerationOptions()
         {
             Output = new OutputOptions();
         }

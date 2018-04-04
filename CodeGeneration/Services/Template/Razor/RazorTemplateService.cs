@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using NLog;
 using RazorEngine.Configuration;
 using RazorEngine.Templating;
@@ -40,19 +39,22 @@ namespace CodeGeneration.Services.Template.Razor
 
         public IEnumerable<string> GetEmbeddedTemplateNames(IEnumerable<string> filterByPaths)
         {
-            return _embeddedResources.Where(er => filterByPaths.Any(er.Contains));
+            var filterByPathList = filterByPaths.ToList();
+            return _embeddedResources.Where(er => !filterByPathList.Any() || filterByPathList.Any(er.Contains));
         }
 
         public IEnumerable<string> GetEmbeddedTemplateNames(IEnumerable<string> filterByPaths, IEnumerable<string> filterByNames)
         {
-            var embeddedResourcesByPaths = _embeddedResources.Where(er => filterByPaths.Any(er.Contains));
+            var filterByPathList = filterByPaths.ToList();
+            var filterByNameList = filterByNames.ToList();
 
-            return embeddedResourcesByPaths.Where(er => filterByNames.Any(er.Contains));
+            var embeddedResourcesByPaths = _embeddedResources.Where(er => !filterByPathList.Any() || filterByPathList.Any(er.Contains));
+            return embeddedResourcesByPaths.Where(er => !filterByNameList.Any() || filterByNameList.Any(er.Contains));
         }
 
         public IEnumerable<string> GetEmbeddedTemplateNames(string filterByPath)
         {
-            return _embeddedResources.Where(er => er.Contains(filterByPath));
+            return !string.IsNullOrWhiteSpace(filterByPath) ? _embeddedResources.Where(er => er.Contains(filterByPath)) : _embeddedResources;
         }
 
         public string ResolveTemplate(string templateName)
