@@ -8,6 +8,8 @@
 
         public ModelGenerationOptions()
         {
+            TemplateDirectories = new string[] { };
+            TemplateNames = new string[] { };
             Output = new OutputOptions();
         }
     }

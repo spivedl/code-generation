@@ -1,0 +1,122 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Model
+@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+@{
+    var modelName = (Model.ViewDataTypeShortName);
+    var modelNameLower = Char.ToLowerInvariant(modelName[0]) + modelName.Substring(1);
+}
+using System;
+using CodeGeneration.Models.Domain;
+using CodeGeneration.Models.View.@modelName;
+using CodeGeneration.Repositories.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace CodeGeneration.Controllers
+{
+    /// <inheritdoc />
+    /// <summary>
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated controller for the @modelName model.
+    /// </summary>
+    public class @(modelName)Controller : Controller
+    {
+        private readonly I@(modelName)Repository _@(modelNameLower)Repository;
+
+        public @(modelName)Controller(I@(modelName)Repository @(modelNameLower)Repository)
+        {
+            _@(modelNameLower)Repository = @(modelNameLower)Repository;
+        }
+
+        public ActionResult Index()
+        {
+            return View(_@(modelNameLower)Repository.FindAll());
+        }
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(@(modelName) @(modelNameLower))
+        {
+            try
+            {
+                _@(modelNameLower)Repository.Create(@(modelNameLower));
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewData["error"] = ex;
+                return View();
+            }
+        }
+
+        public ActionResult Edit(int id)
+        {
+            return View(_@(modelNameLower)Repository.FindOne(id));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(@(modelName) @(modelNameLower))
+        {
+            try
+            {
+                _@(modelNameLower)Repository.Edit(@(modelNameLower));
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewData["error"] = ex;
+                return View(_@(modelNameLower)Repository.FindOne(@(modelNameLower).@(modelName)Id));
+            }
+        }
+
+        public ActionResult Delete(int id)
+        {
+            return View(_@(modelNameLower)Repository.FindOne(id));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(@(modelName) @(modelNameLower))
+        {
+            try
+            {
+                _@(modelNameLower)Repository.Delete(@(modelNameLower).@(modelName)Id);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewData["error"] = ex;
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteAll()
+        {
+            try
+            {
+                _@(modelNameLower)Repository.DeleteAll();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewData["error"] = ex;
+                return View();
+            }
+        }
+    }
+}

@@ -14,6 +14,7 @@
         public string TargetDatabase { get; set; }
         public string TargetSchema { get; set; }
         public string[] ReadOnlyProperties { get; set; }
+        public string[] RootTemplateDirectories { get; set; }
         public ModelGenerationOptions ModelGeneration { get; set; }
         public ViewGenerationOptions ViewGeneration { get; set; }
         public SqlGenerationOptions SqlGeneration { get; set; }

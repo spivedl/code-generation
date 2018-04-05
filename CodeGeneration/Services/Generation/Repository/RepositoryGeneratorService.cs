@@ -33,6 +33,12 @@ namespace CodeGeneration.Services.Generation.Repository
 
         public void Generate(RepositoryGenerationContext context)
         {
+            if (!context.ApplicationOptions.GenerateModels)
+            {
+                Logger.Info("Model generation is disabled. Model generation is required for all other generators at this time. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
             if (!context.ApplicationOptions.GenerateRepositories)
             {
                 Logger.Info("Repository generation is disabled. Change the 'GenerateRepositories' option in the 'appsettings.json' file to enable.");
@@ -86,8 +92,8 @@ namespace CodeGeneration.Services.Generation.Repository
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var className = $"{modelName}{templateName}";
-            var fullPath = Path.ChangeExtension(Path.Combine(basePath, className), extension);
+            var fileName = $"{templateName}".Replace("$modelName$", modelName);
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, fileName), extension);
 
             Logger.Info("Writing generated REPOSITORY to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);

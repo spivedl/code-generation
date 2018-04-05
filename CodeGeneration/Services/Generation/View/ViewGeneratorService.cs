@@ -33,6 +33,12 @@ namespace CodeGeneration.Services.Generation.View
 
         public void Generate(ViewGenerationContext context)
         {
+            if (!context.ApplicationOptions.GenerateModels)
+            {
+                Logger.Info("Model generation is disabled. Model generation is required for all other generators at this time. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
             if (!context.ApplicationOptions.GenerateViews)
             {
                 Logger.Info("View generation is disabled. Change the 'GenerateViews' option in the 'appsettings.json' file to enable.");

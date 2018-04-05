@@ -71,16 +71,17 @@ namespace CodeGeneration.Services.Generation.Model
                         _cacheService.Set(modelName, parsedCode);
                     }
 
-                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, parsedCode);
+                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedCode);
                 }
             }
         }
 
-        private void WriteToFile(OutputOptions options, string modelName, string contents)
+        private void WriteToFile(OutputOptions options, string modelName, string templateName, string contents)
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName), extension);
+            var fileName = $"{templateName}".Replace("$modelName$", modelName);
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, fileName), extension);
 
             Logger.Info("Writing generated MODEL to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);

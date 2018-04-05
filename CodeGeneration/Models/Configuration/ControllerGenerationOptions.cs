@@ -8,6 +8,8 @@
 
         public ControllerGenerationOptions()
         {
+            TemplateDirectories = new string[] { };
+            TemplateNames = new string[] { };
             Output = new OutputOptions();
         }
     }

@@ -8,6 +8,8 @@
 
         public ViewGenerationOptions()
         {
+            TemplateDirectories = new string[] { };
+            TemplateNames = new string[] { };
             Output = new OutputOptions();
         }
     }

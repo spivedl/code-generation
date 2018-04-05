@@ -1,0 +1,22 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Model
+@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+using System;
+
+@{
+    var modelName = (Model.ViewDataTypeShortName);
+}
+namespace CodeGeneration.Repositories.Interfaces
+{
+    /// <inheritdoc />
+    /// <summary>
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated repository interface for the @modelName model.
+    /// </summary>
+    public interface I@(modelName)Repository : ICrudRepository<@modelName>
+    {
+    }
+}

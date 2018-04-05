@@ -32,6 +32,12 @@ namespace CodeGeneration.Services.Generation.Sql
 
         public void Generate(SqlGenerationContext context)
         {
+            if (!context.ApplicationOptions.GenerateModels)
+            {
+                Logger.Info("Model generation is disabled. Model generation is required for all other generators at this time. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
             if (!context.ApplicationOptions.GenerateSql)
             {
                 Logger.Info("SQL generation is disabled. Change the 'GenerateSql' option in the 'appsettings.json' file to enable.");

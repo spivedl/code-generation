@@ -187,18 +187,18 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Templates\ViewGenerator\Create.cshtml" />
-    <EmbeddedResource Include="Templates\ModelGenerator\Model.cshtml" />
+    <EmbeddedResource Include="Templates\ModelGenerator\%24modelName%24.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Edit.cshtml" />
     <EmbeddedResource Include="Templates\SqlGenerator\Search.cshtml" />
     <EmbeddedResource Include="Templates\SqlGenerator\Delete.cshtml" />
     <EmbeddedResource Include="Templates\SqlGenerator\Update.cshtml" />
     <EmbeddedResource Include="Templates\SqlGenerator\Insert.cshtml" />
-    <EmbeddedResource Include="Templates\ControllerGenerator\Controller.cshtml" />
+    <EmbeddedResource Include="Templates\ControllerGenerator\%24modelName%24Controller.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Delete.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Details.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\List.cshtml" />
-    <EmbeddedResource Include="Templates\RepositoryGenerator\Repository.cshtml" />
-    <EmbeddedResource Include="Templates\RepositoryGenerator\IRepository.cshtml" />
+    <EmbeddedResource Include="Templates\RepositoryGenerator\%24modelName%24Repository.cshtml" />
+    <EmbeddedResource Include="Templates\RepositoryGenerator\I%24modelName%24Repository.cshtml" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
