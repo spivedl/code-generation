@@ -2,6 +2,10 @@
 
 ## TODO
 
++ Create a generic `GeneratorService` that uses table definitions - instead of models - along with templates to create output.
+  + This should remove the need for a specific 'generator' for each type since the C# code for each generator is very similar.
+  + This could also remove the need for compiling things in memory, since we should be able to use `TableMetadata` and `ColumnMetadata` to build template models.
+  + Main difference between generator classes right now is the WriteToFile method, so probably need to create a `context` object to determine how a file is named, etc. Also, add to the interface.
 + Add an option for static templates (AKA ICrudRepository)
 + Create `MetadataModel` classes for each generator type to make templates for controllers, repositories, etc. easier to write.
 + Add namespace and using as configuration options for all generators.
