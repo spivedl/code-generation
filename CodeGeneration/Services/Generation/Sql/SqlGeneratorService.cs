@@ -30,7 +30,7 @@ namespace CodeGeneration.Services.Generation.Sql
             _sqlCommandExecutor = sqlCommandExecutor;
         }
 
-        public void Generate(SqlGenerationContext context)
+        public void Generate(GenerationContext context)
         {
             if (!context.ApplicationOptions.GenerateModels)
             {

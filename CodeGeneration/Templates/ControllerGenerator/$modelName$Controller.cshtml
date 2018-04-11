@@ -1,32 +1,36 @@
 ﻿@using System
+@using System.Linq
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Model
-@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+@using CodeGeneration.Models.Metadata.Template
+@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
 @{
-    var modelName = (Model.ViewDataTypeShortName);
-    var modelNameLower = Char.ToLowerInvariant(modelName[0]) + modelName.Substring(1);
+    var tableName = Model.TableMetadata.TableName;
+    var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
+    var rootNamespace = Model.Namespace.Substring(0, Model.Namespace.IndexOf('.'));
+    var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+    var primaryKeyName = primaryKey != null ? primaryKey.ColumnName : "@(Model.ModelNameLower)Id";
+    var primaryKeyNameLower = primaryKeyName.ToFirstCharLowerCase();
 }
 using System;
-using CodeGeneration.Models.Domain;
-using CodeGeneration.Models.View.@modelName;
-using CodeGeneration.Repositories.Interfaces;
+using @modelsNamespace;
+using @(rootNamespace).Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace CodeGeneration.Controllers
+namespace @Model.Namespace
 {
     /// <inheritdoc />
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
     /// Version: @RazorEngineExtensions.Version()
     /// Create Date: @DateTime.Now.ToString("f")
-    /// Description: Auto-generated controller for the @modelName model.
+    /// Description: Auto-generated controller for the @Model.ModelName model.
     /// </summary>
-    public class @(modelName)Controller : Controller
+    public class @(Model.ModelName)Controller : Controller
     {
-        private readonly I@(modelName)Repository _@(modelNameLower)Repository;
+        private readonly I@(Model.ModelName)Repository _@(modelNameLower)Repository;
 
-        public @(modelName)Controller(I@(modelName)Repository @(modelNameLower)Repository)
+        public @(Model.ModelName)Controller(I@(Model.ModelName)Repository @(modelNameLower)Repository)
         {
             _@(modelNameLower)Repository = @(modelNameLower)Repository;
         }
@@ -43,7 +47,7 @@ namespace CodeGeneration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(@(modelName) @(modelNameLower))
+        public ActionResult Create(@(Model.ModelName) @(modelNameLower))
         {
             try
             {
@@ -65,7 +69,7 @@ namespace CodeGeneration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(@(modelName) @(modelNameLower))
+        public ActionResult Edit(@(Model.ModelName) @(modelNameLower))
         {
             try
             {
@@ -76,7 +80,7 @@ namespace CodeGeneration.Controllers
             catch (Exception ex)
             {
                 ViewData["error"] = ex;
-                return View(_@(modelNameLower)Repository.FindOne(@(modelNameLower).@(modelName)Id));
+                return View(_@(modelNameLower)Repository.FindOne(@(modelNameLower).@(Model.ModelName)Id));
             }
         }
 
@@ -87,11 +91,11 @@ namespace CodeGeneration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(@(modelName) @(modelNameLower))
+        public ActionResult Delete(@(Model.ModelName) @(modelNameLower))
         {
             try
             {
-                _@(modelNameLower)Repository.Delete(@(modelNameLower).@(modelName)Id);
+                _@(modelNameLower)Repository.Delete(@(modelNameLower).@(Model.ModelName)Id);
 
                 return RedirectToAction(nameof(Index));
             }

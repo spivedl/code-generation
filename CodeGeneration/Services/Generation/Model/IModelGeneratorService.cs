@@ -2,7 +2,7 @@
 
 namespace CodeGeneration.Services.Generation.Model
 {
-    public interface IModelGeneratorService : IGeneratorService<ModelGenerationContext>
+    public interface IModelGeneratorService : IGeneratorService<GenerationContext>
     {
         
     }

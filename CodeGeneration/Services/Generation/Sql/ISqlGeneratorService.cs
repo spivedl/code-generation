@@ -2,7 +2,7 @@
 
 namespace CodeGeneration.Services.Generation.Sql
 {
-    public interface ISqlGeneratorService : IGeneratorService<SqlGenerationContext>
+    public interface ISqlGeneratorService : IGeneratorService<GenerationContext>
     {
         
     }

@@ -1,4 +1,7 @@
-﻿namespace CodeGeneration.Models.Metadata.Sql
+﻿using System;
+using CodeGeneration.Extensions;
+
+namespace CodeGeneration.Models.Metadata.Sql
 {
     public class ColumnMetadata
     {
@@ -63,6 +66,11 @@
                 && (ColumnDefault.Contains("getdate") || ColumnDefault.Contains("getutcdate"))) return "";
 
             return string.IsNullOrWhiteSpace(ColumnDefault) ? "" : $" = {ColumnDefault}";
+        }
+
+        public bool IsBooleanType()
+        {
+            return SqlDataTypeConverter.GetType(DataType) == typeof(bool);
         }
     }
 }

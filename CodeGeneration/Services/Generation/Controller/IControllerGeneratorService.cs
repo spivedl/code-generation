@@ -2,7 +2,7 @@
 
 namespace CodeGeneration.Services.Generation.Controller
 {
-    public interface IControllerGeneratorService : IGeneratorService<ControllerGenerationContext>
+    public interface IControllerGeneratorService : IGeneratorService<GenerationContext>
     {
     }
 }

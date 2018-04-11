@@ -15,19 +15,19 @@
         public string TargetSchema { get; set; }
         public string[] ReadOnlyProperties { get; set; }
         public string[] RootTemplateDirectories { get; set; }
-        public ModelGenerationOptions ModelGeneration { get; set; }
-        public ViewGenerationOptions ViewGeneration { get; set; }
-        public SqlGenerationOptions SqlGeneration { get; set; }
-        public ControllerGenerationOptions ControllerGeneration { get; set; }
-        public RepositoryGenerationOptions RepositoryGeneration { get; set; }
+        public GenerationOptions ModelGeneration { get; set; }
+        public GenerationOptions ViewGeneration { get; set; }
+        public GenerationOptions SqlGeneration { get; set; }
+        public GenerationOptions ControllerGeneration { get; set; }
+        public GenerationOptions RepositoryGeneration { get; set; }
 
         public ApplicationOptions()
         {
-            ModelGeneration = new ModelGenerationOptions();
-            ViewGeneration = new ViewGenerationOptions();
-            SqlGeneration = new SqlGenerationOptions();
-            ControllerGeneration = new ControllerGenerationOptions();
-            RepositoryGeneration = new RepositoryGenerationOptions();
+            ControllerGeneration = new GenerationOptions();
+            ModelGeneration = new GenerationOptions();
+            SqlGeneration = new GenerationOptions();
+            RepositoryGeneration = new GenerationOptions();
+            ViewGeneration = new GenerationOptions();
         }
     }
 }

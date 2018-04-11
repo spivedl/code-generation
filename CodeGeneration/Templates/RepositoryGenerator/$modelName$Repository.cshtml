@@ -1,43 +1,45 @@
 ﻿@using System
+@using System.Linq
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Model
-@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+@using CodeGeneration.Models.Metadata.Template
+@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
 @{
-    var modelName = (Model.ViewDataTypeShortName);
-    var modelNameLower = Char.ToLowerInvariant(modelName[0]) + modelName.Substring(1);
-    var tableName = (Model.ViewDataTypeShortName.ToDelimited("_").ToLowerInvariant());
+    var tableName = Model.TableMetadata.TableName;
+    var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
+    var rootNamespace = Model.Namespace.Substring(0, Model.Namespace.IndexOf('.'));
+    var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+    var primaryKeyName = primaryKey != null ? primaryKey.ColumnName : "@(Model.ModelNameLower)Id";
+    var primaryKeyNameLower = primaryKeyName.ToFirstCharLowerCase();
 }
-
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using Dapper;
-using CodeGeneration.Models.@modelName;
-using CodeGeneration.Repositories.Interfaces;
-using CodeGeneration.Services.Data;
+using @modelsNamespace;
+using @(Model.Namespace).Interfaces;
+using @(rootNamespace).Services.Data;
 
-namespace CodeGeneration.Repositories.Dapper
+namespace @(Model.Namespace).Dapper
 {
     /// <inheritdoc />
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
     /// Version: @RazorEngineExtensions.Version()
     /// Create Date: @DateTime.Now.ToString("f")
-    /// Description: Auto-generated repository for the @modelName model.
+    /// Description: Auto-generated repository for the @Model.ModelName model.
     /// </summary>
-    public class @(modelName)Repository : I@(modelName)Repository
+    public class @(Model.ModelName)Repository : I@(Model.ModelName)Repository
     {
         private readonly IDataService _dataService;
 
-        private IDbConnection Connection => _dataService.GetConnection("keeptime");
+        private IDbConnection Connection => _dataService.GetConnection("@Model.SourceConnectionKey");
 
-        public @(modelName)Repository(IDataService dataService)
+        public @(Model.ModelName)Repository(IDataService dataService)
         {
             _dataService = dataService;
         }
 
-        public @modelName Create(@modelName item)
+        public @Model.ModelName Create(@Model.ModelName @modelNameLower)
         {
             const string storedProcedure = @@"[main].[sp_insert_@tableName]";
 
@@ -45,23 +47,23 @@ namespace CodeGeneration.Repositories.Dapper
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                item.@(modelName)Id = connection.QuerySingle<int>(
+                @(modelNameLower).@(primaryKeyName) = connection.QuerySingle<int>(
                     storedProcedure,
                     new
                     {
-                    @foreach (var prop in @Model.Properties)
+                    @foreach(var columnMetadata in @Model.TableMetadata.Columns)
                     {
-                        if (prop.IsPrimaryKey || prop.IsReadOnly) { continue; }
-                        @:item.@(prop.PropertyName),
+                        if (columnMetadata.IsPrimaryKey || columnMetadata.IsReadOnly) { continue; }
+                        @:@(modelNameLower).@(columnMetadata.ColumnName),
                     }
                     },
                     commandType: CommandType.StoredProcedure);
 
-                return item;
+                return @modelNameLower;
             }
         }
 
-        public @modelName Edit(@modelName item)
+        public @Model.ModelName Edit(@Model.ModelName @modelNameLower)
         {
             const string storedProcedure = @@"[main].[sp_update_@tableName]";
 
@@ -73,19 +75,19 @@ namespace CodeGeneration.Repositories.Dapper
                     storedProcedure,
                     new
                     {
-                    @foreach (var prop in @Model.Properties)
+                    @foreach(var columnMetadata in @Model.TableMetadata.Columns)
                     {
-                        if (prop.IsReadOnly) { continue; }
-                        @:item.@(prop.PropertyName),
+                        if (columnMetadata.IsReadOnly) { continue; }
+                        @:@(modelNameLower).@(columnMetadata.ColumnName),
                     }
                     },
                     commandType: CommandType.StoredProcedure);
 
-            return item;
+                return @modelNameLower;
             }
         }
 
-        public int Delete(int @(modelNameLower)Id)
+        public int Delete(int @primaryKeyNameLower)
         {
             const string storedProcedure = @@"[main].[sp_delete_@tableName]";
 
@@ -93,7 +95,7 @@ namespace CodeGeneration.Repositories.Dapper
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.Execute(storedProcedure, new { @(modelName)Id = @(modelNameLower)Id }, commandType: CommandType.StoredProcedure);
+                return connection.Execute(storedProcedure, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.StoredProcedure);
             }
         }
 
@@ -109,7 +111,7 @@ namespace CodeGeneration.Repositories.Dapper
             }
         }
 
-        public @modelName FindOne(int @(modelNameLower)Id)
+        public @Model.ModelName FindOne(int @primaryKeyNameLower)
         {
             const string storedProcedure = @@"[main].[sp_search_@tableName]";
 
@@ -117,11 +119,11 @@ namespace CodeGeneration.Repositories.Dapper
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.QuerySingle<@modelName>(storedProcedure, new { @(modelName)Id = @(modelNameLower)Id }, commandType: CommandType.StoredProcedure);
+                return connection.QuerySingle<@Model.ModelName>(storedProcedure, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.StoredProcedure);
             }
         }
 
-        public IEnumerable<@modelName> FindAll()
+        public IEnumerable<@Model.ModelName> FindAll()
         {
             const string storedProcedure = @@"[main].[sp_search_@tableName]";
 
@@ -129,7 +131,7 @@ namespace CodeGeneration.Repositories.Dapper
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.Query<@modelName>(storedProcedure, commandType: CommandType.StoredProcedure);
+                return connection.Query<@Model.ModelName>(storedProcedure, commandType: CommandType.StoredProcedure);
             }
         }
     }

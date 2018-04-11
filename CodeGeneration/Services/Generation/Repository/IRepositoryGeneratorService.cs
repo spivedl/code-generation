@@ -2,7 +2,7 @@
 
 namespace CodeGeneration.Services.Generation.Repository
 {
-    public interface IRepositoryGeneratorService : IGeneratorService<RepositoryGenerationContext>
+    public interface IRepositoryGeneratorService : IGeneratorService<GenerationContext>
     {
     }
 }

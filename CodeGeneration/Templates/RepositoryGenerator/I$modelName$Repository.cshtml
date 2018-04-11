@@ -1,22 +1,23 @@
 ﻿@using System
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Model
-@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
-using System;
-
+@using CodeGeneration.Models.Metadata.Template
+@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
 @{
-    var modelName = (Model.ViewDataTypeShortName);
+    var rootNamespace = Model.Namespace.Substring(0, Model.Namespace.IndexOf('.'));
+    var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
 }
-namespace CodeGeneration.Repositories.Interfaces
+using @modelsNamespace;
+
+namespace @(Model.Namespace).Interfaces
 {
     /// <inheritdoc />
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
     /// Version: @RazorEngineExtensions.Version()
     /// Create Date: @DateTime.Now.ToString("f")
-    /// Description: Auto-generated repository interface for the @modelName model.
+    /// Description: Auto-generated repository interface for the @Model.TableMetadata.TableName model.
     /// </summary>
-    public interface I@(modelName)Repository : ICrudRepository<@modelName>
+    public interface I@(Model.ModelName)Repository : ICrudRepository<@Model.ModelName>
     {
     }
 }

@@ -37,11 +37,11 @@ namespace CodeGeneration.Services.Boot
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            _modelGeneratorService.Generate(new ModelGenerationContext { ApplicationOptions = _applicationOptions });
-            _repositoryGeneratorService.Generate(new RepositoryGenerationContext { ApplicationOptions = _applicationOptions });
-            _controllerGeneratorService.Generate(new ControllerGenerationContext { ApplicationOptions = _applicationOptions });
-            _viewGeneratorService.Generate(new ViewGenerationContext { ApplicationOptions = _applicationOptions });
-            _sqlGeneratorService.Generate(new SqlGenerationContext { ApplicationOptions = _applicationOptions });
+            _modelGeneratorService.Generate(new GenerationContext { ApplicationOptions = _applicationOptions });
+            _repositoryGeneratorService.Generate(new GenerationContext { ApplicationOptions = _applicationOptions });
+            _controllerGeneratorService.Generate(new GenerationContext { ApplicationOptions = _applicationOptions });
+            _viewGeneratorService.Generate(new GenerationContext { ApplicationOptions = _applicationOptions });
+            _sqlGeneratorService.Generate(new GenerationContext { ApplicationOptions = _applicationOptions });
 
             stopwatch.Stop();
 

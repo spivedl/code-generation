@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -98,18 +98,10 @@
     <Compile Include="Extensions\RazorEngineExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Models\Configuration\ArgumentBuilder.cs" />
-    <Compile Include="Models\Configuration\RepositoryGenerationOptions.cs" />
+    <Compile Include="Models\Configuration\GenerationOptions.cs" />
     <Compile Include="Models\Configuration\SqlCommandOptions.cs" />
-    <Compile Include="Models\Configuration\SqlGenerationOptions.cs" />
-    <Compile Include="Models\Configuration\ModelGenerationOptions.cs" />
     <Compile Include="Models\Configuration\OutputOptions.cs" />
-    <Compile Include="Models\Configuration\ControllerGenerationOptions.cs" />
-    <Compile Include="Models\Configuration\ViewGenerationOptions.cs" />
-    <Compile Include="Models\Context\BaseGenerationContext.cs" />
-    <Compile Include="Models\Context\RepositoryGenerationContext.cs" />
-    <Compile Include="Models\Context\ControllerGenerationContext.cs" />
-    <Compile Include="Models\Context\SqlGenerationContext.cs" />
-    <Compile Include="Models\Context\ModelGenerationContext.cs" />
+    <Compile Include="Models\Context\GenerationContext.cs" />
     <Compile Include="Models\Context\TableMetadataContext.cs" />
     <Compile Include="Models\Metadata\Model\ViewModelMetadata.cs" />
     <Compile Include="Models\Metadata\Model\PropertyMetadata.cs" />
@@ -123,6 +115,7 @@
     <Compile Include="Models\Metadata\Sql\RelationshipMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\TableMetadata.cs" />
     <Compile Include="Models\Metadata\Template\TemplateMetadata.cs" />
+    <Compile Include="Models\Metadata\Template\TemplateModelMetadata.cs" />
     <Compile Include="Modules\CachingModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -158,7 +151,6 @@
     <Compile Include="Services\Generation\Sql\ISqlGeneratorService.cs" />
     <Compile Include="Services\Generation\Sql\SqlGeneratorService.cs" />
     <Compile Include="Services\Generation\View\IViewGeneratorService.cs" />
-    <Compile Include="Models\Context\ViewGenerationContext.cs" />
     <Compile Include="Services\Generation\View\ViewGeneratorService.cs" />
     <Compile Include="Services\Process\IProcessExecutorService.cs" />
     <Compile Include="Services\Process\ISqlCommandExecutorService.cs" />

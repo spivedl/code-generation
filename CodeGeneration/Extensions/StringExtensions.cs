@@ -24,6 +24,11 @@ namespace CodeGeneration.Extensions
             return string.Concat(input.Select((ch, i) => (i > 0) && char.IsUpper(ch) ? delimiter + ch.ToString() : ch.ToString()));
         }
 
+        public static string ToFirstCharLowerCase(this string input)
+        {
+            return char.ToLowerInvariant(input[0]) + input.Substring(1);
+        }
+
         public static string ToPath(this string input)
         {
             return input.Replace(".", "\\\\");
