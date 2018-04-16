@@ -1,4 +1,6 @@
-﻿namespace CodeGeneration.Models.Metadata.Sql
+﻿using CodeGeneration.Extensions;
+
+namespace CodeGeneration.Models.Metadata.Sql
 {
     public class ColumnMetadata
     {
@@ -25,10 +27,10 @@
             NumericScale = -1;
         }
 
-        public string GetParameterString()
+        public string GetParameterString(bool isForSearch = false)
         {
             var dataType = GetParameterDataType();
-            var defaultValue = GetParameterDefaultValue();
+            var defaultValue = GetParameterDefaultValue(isForSearch);
 
             return $"@{ColumnName} {dataType}{defaultValue}";
         }
@@ -56,13 +58,25 @@
             return $"{dataTypeUpper}";
         }
 
-        private string GetParameterDefaultValue()
+        private string GetParameterDefaultValue(bool isForSearch = false)
         {
-            if (IsNullable && string.IsNullOrWhiteSpace(ColumnDefault)) return " = NULL";
-            if (!string.IsNullOrWhiteSpace(ColumnDefault) 
-                && (ColumnDefault.Contains("getdate") || ColumnDefault.Contains("getutcdate"))) return "";
+            if (string.IsNullOrWhiteSpace(ColumnDefault))
+            {
+                if (IsNullable || isForSearch) return " = NULL";
+                return "";
+            }
 
-            return string.IsNullOrWhiteSpace(ColumnDefault) ? "" : $" = {ColumnDefault}";
+            if (ColumnDefault.Contains("getdate") || ColumnDefault.Contains("getutcdate"))
+            {
+                return isForSearch ? " = NULL" : "";
+            }
+
+            return $" = {ColumnDefault}";
+        }
+
+        public bool IsBooleanType()
+        {
+            return SqlDataTypeConverter.GetType(DataType) == typeof(bool);
         }
     }
 }

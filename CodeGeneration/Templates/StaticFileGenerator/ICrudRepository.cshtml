@@ -1,0 +1,35 @@
+﻿@using System
+@using CodeGeneration.Extensions
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.StaticFileTemplateModel>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace @(Model.TargetNamespace).Repositories.Interfaces
+{
+    /// <summary>
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated repository interface for standard CRUD operations.
+    /// </summary>
+    public interface ICrudRepository<T>
+    {
+        T Create(T item);
+        T Edit(T item);
+        int Delete(int id);
+        int DeleteAll();
+        T FindOne(int id);
+        IEnumerable<T>
+        FindAll();
+    }
+
+    public static class CrudRepositoryExtensions
+    {
+        public static IEnumerable<SelectListItem> ToSelectItems<T>(this IEnumerable<T> items, Func<T, SelectListItem> provider)
+        {
+            return items.Select(provider);
+        }
+    }
+}

@@ -1,0 +1,97 @@
+﻿@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@{
+    var tableName = Model.TableMetadata.TableName;
+    var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+    var primaryKeyName = primaryKey != null ? primaryKey.ColumnName : "@(Model.ModelNameLower)Id";
+    var primaryKeyNameLower = primaryKeyName.ToFirstCharLowerCase();
+}
+@@model @Raw(GetEnumerableTypeExpression(@Model.TargetNamespace, @Model.ModelName))
+
+@@{
+    ViewData["Title"] = "@Model.ModelName.ToUpperDelimited() List";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <div class="row">
+                    <div class="col-10">
+                        <h4>@Model.ModelName List</h4>
+                    </div>
+                    <div class="col-2">
+                        <a href="@Raw(GetUrlExpression("Create", Model.ModelName))" class="btn btn-block btn-success font-weight-bold">
+                            <i class="fas fa-pencil-alt"></i> Create @Model.ModelName
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            @foreach (var columnMetadata in Model.TableMetadata.Columns)
+                            {
+                                if (columnMetadata.IsPrimaryKey || columnMetadata.IsForeignKey) { continue; }
+                                <th scope="col">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</th>
+                            }
+                            <th scope="col" colspan="2" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @@if(Model.Any()){
+                        @@foreach(var @modelNameLower in Model){
+                        <tr>
+                            @foreach (var columnMetadata in Model.TableMetadata.Columns)
+                            {
+                                if (columnMetadata.IsPrimaryKey || columnMetadata.IsForeignKey) { continue; }
+                                <td>@@Html.DisplayFor(model => @(modelNameLower).@GetValueExpression(columnMetadata))</td>
+                            }
+                            <td>
+                                <a href="@Raw(GetUrlExpression("Edit", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-info">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </td>
+                            <td>
+                                <a href="@Raw(GetUrlExpression("Delete", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        }
+                        } else {
+                        <tr>
+                            <td class="text-center" colspan="@Model.TableMetadata.Columns.Count + 2">
+                                <strong>No records found...</strong>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions
+{
+    string GetEnumerableTypeExpression(string ns, string modelName)
+    {
+        return string.Format("IEnumerable<{0}.{1}>", ns, modelName);
+    }
+
+    static string GetValueExpression(ColumnMetadata columnMetadata)
+    {
+        return columnMetadata.ColumnName;
+    }
+
+    static string GetUrlExpression(string actionName, string modelName, string modelNameLower = "", string primaryKeyName = "")
+    {
+        return string.IsNullOrWhiteSpace(modelNameLower) || string.IsNullOrWhiteSpace(primaryKeyName)
+            ? string.Format("@Url.Action(\"{0}\", \"{1}\")", actionName, modelName)
+            : string.Format("@Url.Action(\"{0}\", \"{1}\", new {{ id = {2}.{3} }})", actionName, modelName, modelNameLower, primaryKeyName);
+    }
+}

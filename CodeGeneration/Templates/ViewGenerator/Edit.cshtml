@@ -1,40 +1,43 @@
-﻿@using CodeGeneration.Models.Metadata.Model
-@inherits RazorEngine.Templating.TemplateBase<ViewModelMetadata>
+﻿@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@@model @(Model.TargetNamespace).@(Model.ModelName)
 
-@@model @Model.ViewDataTypeName
+@@{
+ViewData["Title"] = "Edit @Model.ModelName.ToUpperDelimited()";
+}
+
 
 <div class="row justify-content-center">
-    <div class="col-6">
+    <div class="col-12">
         <div class="card">
-            <div class="text-center">
-                <h4 class="card-header bg-secondary text-white">@Model.Title</h4>
-            </div>
+            <h4 class="card-header bg-dark text-white">Edit @Model.ModelName</h4>
             <div class="card-body">
-                <form asp-action="@Model.ViewName">
+                <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    @foreach (var property in Model.Properties)
+                    @foreach (var columnMetadata in Model.TableMetadata.Columns)
                     {
-                        var propertyAccessor = string.Format("{0}", property.PropertyName);
+                        var propertyAccessor = string.Format("{0}", columnMetadata.ColumnName);
 
-                        if (property.IsReadOnly || !property.Scaffold) { continue; }
-                        if (property.IsPrimaryKey)
+                        if (columnMetadata.IsReadOnly) { continue; }
+                        if (columnMetadata.IsPrimaryKey)
                         {
-                            <input type="hidden" asp-for="@propertyAccessor"/>
+                            <input type="hidden" asp-for="@propertyAccessor" />
                             continue;
                         }
-                        if (property.IsForeignKey || !string.IsNullOrWhiteSpace(property.ItemSourceName))
+                        if (columnMetadata.IsForeignKey)
                         {
-                            var itemSourceName = string.Format("ViewBag.{0}", property.ItemSourceName);
+                            var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
                             <div class="form-group">
                                 <label asp-for="@propertyAccessor"></label>
                                 <select asp-for="@propertyAccessor" class="form-control" asp-items="@itemSourceName"></select>
                                 <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
                             </div>
                         }
-                        else if (property.TypeName.Equals("System.Boolean"))
+                        else if (columnMetadata.IsBooleanType())
                         {
                             <div class="form-check">
-                                <input asp-for="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
+                                <input asp-for="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
                                 <label asp-for="@propertyAccessor" class="form-check-label"></label>
                             </div>
                         }
@@ -49,7 +52,7 @@
                     }
                     <div class="form-group">
                         <button type="submit" class="btn btn-lg btn-block btn-success">
-                            <i class="fas fa-save"></i> Create
+                            <i class="fas fa-save"></i> Save
                         </button>
                     </div>
                     <div class="form-group">
@@ -65,8 +68,8 @@
 
 @functions
 {
-    static string GetValueExpression(PropertyMetadata property)
+    static string GetValueExpression(ColumnMetadata columnMetadata)
     {
-        return property.PropertyName;
+        return columnMetadata.ColumnName;
     }
 }

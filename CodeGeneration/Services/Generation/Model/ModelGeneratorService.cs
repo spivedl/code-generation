@@ -3,6 +3,7 @@ using System.IO;
 using CodeGeneration.Extensions;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
+using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
@@ -27,7 +28,7 @@ namespace CodeGeneration.Services.Generation.Model
             _fileWriter = fileWriter;
         }
 
-        public void Generate(ModelGenerationContext context)
+        public void Generate(GenerationContext context)
         {
             if (!context.ApplicationOptions.GenerateModels)
             {
@@ -41,37 +42,38 @@ namespace CodeGeneration.Services.Generation.Model
             var schema = context.ApplicationOptions.SourceSchema;
             var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
 
-            var tableMetadata = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
             {
-                foreach (var table in tableMetadata)
-                {
-                    var modelName = table.TableName.ToCamelCase();
-                    var razorEngineKey = resource.ToRazorEngineKey();
-                    var templateName = resource.ToTemplateName();
+                var razorEngineKey = resource.ToRazorEngineKey();
+                var templateName = resource.ToTemplateName();
 
+                foreach (var tableMetadata in tableMetadataSet)
+                {
+                    var modelName = tableMetadata.TableName.ToCamelCase();
+  
                     Logger.Info("Model Name: {0}", modelName);
                     Logger.Info("Embedded resource: {0}", resource);
                     Logger.Info("Razor Engine Key: {0}", razorEngineKey);
                     Logger.Info("Template Name: {0}", templateName);
 
-                    string parsedCode;
+                    string parsedContents;
                     if (_cacheService.Exists(modelName))
                     {
                         Logger.Info("[CACHE HIT]: Model code for {0} found in cache.", modelName);
-                        parsedCode = _cacheService.Get<string>(modelName);
+                        parsedContents = _cacheService.Get<string>(modelName);
                     }
                     else
                     {
                         Logger.Info("[CACHE MISS]: Model code for {0} NOT found in cache. Will process template and add to cache.", modelName);
 
-                        parsedCode = _razorTemplateService.Process(razorEngineKey, table);
-                        _cacheService.Set(modelName, parsedCode);
+                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
+                        _cacheService.Set(modelName, parsedContents);
                     }
 
-                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedCode);
+                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedContents);
                 }
             }
         }

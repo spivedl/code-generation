@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=4.6.2.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.4.6.2\lib\net45\Autofac.dll</HintPath>
+    <Reference Include="Autofac, Version=4.7.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.7.0\lib\net45\Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Configuration, Version=2.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.Configuration.2.0.1\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll</HintPath>
@@ -65,18 +65,23 @@
     <Reference Include="Microsoft.Extensions.Primitives, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.Primitives.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.4.13\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.5.2\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="RazorEngine, Version=3.10.0.0, Culture=neutral, PublicKeyToken=9ee697374c7e744a, processorArchitecture=MSIL">
       <HintPath>..\packages\RazorEngine.3.10.0\lib\net45\RazorEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Caching" />
@@ -84,8 +89,25 @@
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.4.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.4\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.0.0\lib\net45\System.Web.Razor.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.4\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -98,18 +120,10 @@
     <Compile Include="Extensions\RazorEngineExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Models\Configuration\ArgumentBuilder.cs" />
-    <Compile Include="Models\Configuration\RepositoryGenerationOptions.cs" />
+    <Compile Include="Models\Configuration\GenerationOptions.cs" />
     <Compile Include="Models\Configuration\SqlCommandOptions.cs" />
-    <Compile Include="Models\Configuration\SqlGenerationOptions.cs" />
-    <Compile Include="Models\Configuration\ModelGenerationOptions.cs" />
     <Compile Include="Models\Configuration\OutputOptions.cs" />
-    <Compile Include="Models\Configuration\ControllerGenerationOptions.cs" />
-    <Compile Include="Models\Configuration\ViewGenerationOptions.cs" />
-    <Compile Include="Models\Context\BaseGenerationContext.cs" />
-    <Compile Include="Models\Context\RepositoryGenerationContext.cs" />
-    <Compile Include="Models\Context\ControllerGenerationContext.cs" />
-    <Compile Include="Models\Context\SqlGenerationContext.cs" />
-    <Compile Include="Models\Context\ModelGenerationContext.cs" />
+    <Compile Include="Models\Context\GenerationContext.cs" />
     <Compile Include="Models\Context\TableMetadataContext.cs" />
     <Compile Include="Models\Metadata\Model\ViewModelMetadata.cs" />
     <Compile Include="Models\Metadata\Model\PropertyMetadata.cs" />
@@ -122,7 +136,9 @@
     <Compile Include="Models\Metadata\Sql\ColumnMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\RelationshipMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\TableMetadata.cs" />
-    <Compile Include="Models\Metadata\Template\TemplateMetadata.cs" />
+    <Compile Include="Models\Template\ControllerTemplateModel.cs" />
+    <Compile Include="Models\Template\StaticFileTemplateModel.cs" />
+    <Compile Include="Models\Template\TableMetadataTemplateModel.cs" />
     <Compile Include="Modules\CachingModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -157,8 +173,9 @@
     <Compile Include="Services\Generation\Repository\IRepositoryGeneratorService.cs" />
     <Compile Include="Services\Generation\Sql\ISqlGeneratorService.cs" />
     <Compile Include="Services\Generation\Sql\SqlGeneratorService.cs" />
+    <Compile Include="Services\Generation\StaticFile\StaticFileGeneratorService.cs" />
+    <Compile Include="Services\Generation\StaticFile\IStaticFileGeneratorService.cs" />
     <Compile Include="Services\Generation\View\IViewGeneratorService.cs" />
-    <Compile Include="Models\Context\ViewGenerationContext.cs" />
     <Compile Include="Services\Generation\View\ViewGeneratorService.cs" />
     <Compile Include="Services\Process\IProcessExecutorService.cs" />
     <Compile Include="Services\Process\ISqlCommandExecutorService.cs" />
@@ -196,9 +213,11 @@
     <EmbeddedResource Include="Templates\ControllerGenerator\%24modelName%24Controller.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Delete.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Details.cshtml" />
-    <EmbeddedResource Include="Templates\ViewGenerator\List.cshtml" />
+    <EmbeddedResource Include="Templates\ViewGenerator\Index.cshtml" />
     <EmbeddedResource Include="Templates\RepositoryGenerator\%24modelName%24Repository.cshtml" />
     <EmbeddedResource Include="Templates\RepositoryGenerator\I%24modelName%24Repository.cshtml" />
+    <EmbeddedResource Include="Templates\StaticFileGenerator\_Layout.cshtml" />
+    <EmbeddedResource Include="Templates\StaticFileGenerator\ICrudRepository.cshtml" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>

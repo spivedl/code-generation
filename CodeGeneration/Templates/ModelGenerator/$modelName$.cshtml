@@ -1,31 +1,23 @@
 ﻿@using System
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Sql
-@inherits RazorEngine.Templating.TemplateBase<TableMetadata>
-
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 using System;
-using CodeGeneration.Models.Domain.Attributes;
+using System.ComponentModel;
 
-namespace CodeGeneration.Models.Domain
+namespace @Model.TargetNamespace
 {
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
     /// Version: @RazorEngineExtensions.Version()
     /// Create Date: @DateTime.Now.ToString("f")
-    /// Description: Auto-generated model for the @Model.TableName table.
+    /// Description: Auto-generated model for the @Model.TableMetadata.TableName table.
     /// </summary>
-    public class @Model.TableName.ToCamelCase()
+    public class @Model.ModelName
     {
-    @foreach (var column in @Model.Columns)
+    @foreach (var column in @Model.TableMetadata.Columns)
     {
-        if (column.IsPrimaryKey){
-        @:[PrimaryKey]
-        }
-        if (column.IsForeignKey){
-        @:@Raw(string.Format("[ForeignKey(\"{0}List\")]", column.ColumnName.Replace("Id", "")))
-        }
         if (column.IsReadOnly){
-        @:[ReadOnly]
+        @:[ReadOnly(true)]
         }
         @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited()))
         @:@string.Format("public {0} {1} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.ColumnName)

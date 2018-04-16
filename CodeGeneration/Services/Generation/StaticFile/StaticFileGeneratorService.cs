@@ -10,9 +10,9 @@ using CodeGeneration.Services.File;
 using CodeGeneration.Services.Template.Razor;
 using NLog;
 
-namespace CodeGeneration.Services.Generation.Controller
+namespace CodeGeneration.Services.Generation.StaticFile
 {
-    public class ControllerGeneratorService : IControllerGeneratorService
+    public class StaticFileGeneratorService : IStaticFileGeneratorService
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITableMetadataService _tableMetadataService;
@@ -20,7 +20,7 @@ namespace CodeGeneration.Services.Generation.Controller
         private readonly ICacheService _cacheService;
         private readonly IFileWriter _fileWriter;
 
-        public ControllerGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter)
+        public StaticFileGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter)
         {
             _tableMetadataService = tableMetadataService;
             _razorTemplateService = razorTemplateService;
@@ -30,13 +30,13 @@ namespace CodeGeneration.Services.Generation.Controller
 
         public void Generate(GenerationContext context)
         {
-            if (!context.ApplicationOptions.GenerateControllers)
+            if (!context.ApplicationOptions.GenerateStaticFiles)
             {
-                Logger.Info("Controller generation is disabled. Change the 'GenerateControllers' option in the 'appsettings.json' file to enable.");
+                Logger.Info("Static File generation is disabled. Change the 'GenerateStaticFile' option in the 'appsettings.json' file to enable.");
                 return;
             }
 
-            var options = context.ApplicationOptions.ControllerGeneration;
+            var options = context.ApplicationOptions.StaticFileGeneration;
             var connectionKey = context.ApplicationOptions.SourceConnectionKey;
             var database = context.ApplicationOptions.SourceDatabase;
             var schema = context.ApplicationOptions.SourceSchema;
@@ -49,44 +49,38 @@ namespace CodeGeneration.Services.Generation.Controller
             {
                 var razorEngineKey = resource.ToRazorEngineKey();
                 var templateName = resource.ToTemplateName();
+                var cacheKey = _cacheService.BuildCacheKey(templateName);
 
-                foreach (var tableMetadata in tableMetadataSet)
+                Logger.Info("Embedded resource: {0}", resource);
+                Logger.Info("Razor Engine Key: {0}", razorEngineKey);
+                Logger.Info("Template Name: {0}", templateName);
+
+                string parsedContents;
+                if (_cacheService.Exists(cacheKey))
                 {
-                    var modelName = tableMetadata.TableName.ToCamelCase();
-                    var cacheKey = _cacheService.BuildCacheKey(modelName, templateName);
-
-                    Logger.Info("Model Name: {0}", modelName);
-                    Logger.Info("Embedded resource: {0}", resource);
-                    Logger.Info("Razor Engine Key: {0}", razorEngineKey);
-                    Logger.Info("Template Name: {0}", templateName);
-
-                    string parsedContents;
-                    if (_cacheService.Exists(cacheKey))
-                    {
-                        Logger.Info("[CACHE HIT]: Controller code for {0} found in cache.", cacheKey);
-                        parsedContents = _cacheService.Get<string>(cacheKey);
-                    }
-                    else
-                    {
-                        Logger.Info("[CACHE MISS]: Controller code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
-
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, new ControllerTemplateModel(options.Namespace, tableMetadata));
-                        _cacheService.Set(cacheKey, parsedContents);
-                    }
-
-                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedContents);
+                    Logger.Info("[CACHE HIT]: Static File code for {0} found in cache.", cacheKey);
+                    parsedContents = _cacheService.Get<string>(cacheKey);
                 }
+                else
+                {
+                    Logger.Info("[CACHE MISS]: Static File code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
+
+                    parsedContents = _razorTemplateService.Process(razorEngineKey, new StaticFileTemplateModel { TargetNamespace = options.Namespace, TableMetadataSet = tableMetadataSet });
+                    _cacheService.Set(cacheKey, parsedContents);
+                }
+
+                if (options.Output.GenerateOutput) WriteToFile(options.Output, templateName, parsedContents);
             }
         }
 
-        private void WriteToFile(OutputOptions options, string modelName, string templateName, string contents)
+        private void WriteToFile(OutputOptions options, string templateName, string contents)
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var fileName = $"{templateName}".Replace("$modelName$", modelName);
+            var fileName = $"{templateName}";
             var fullPath = Path.ChangeExtension(Path.Combine(basePath, fileName), extension);
 
-            Logger.Info("Writing generated CONTROLLER to output file at '{0}'.", fullPath);
+            Logger.Info("Writing generated Static File to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);
         }
 

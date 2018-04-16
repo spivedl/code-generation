@@ -3,11 +3,10 @@ using System.IO;
 using CodeGeneration.Extensions;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
-using CodeGeneration.Models.Metadata.Model;
+using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
-using CodeGeneration.Services.Compiler;
+using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
-using CodeGeneration.Services.Generation.Model;
 using CodeGeneration.Services.Template.Razor;
 using NLog;
 
@@ -16,29 +15,21 @@ namespace CodeGeneration.Services.Generation.Repository
     public class RepositoryGeneratorService : IRepositoryGeneratorService
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly ICacheService _cacheService;
         private readonly IRazorTemplateService _razorTemplateService;
-        private readonly IModelGeneratorService _modelGeneratorService;
-        private readonly ICompilerService _compilerService;
+        private readonly ITableMetadataService _tableMetadataService;
+        private readonly ICacheService _cacheService;
         private readonly IFileWriter _fileWriter;
 
-        public RepositoryGeneratorService(ICacheService cacheService, IRazorTemplateService razorTemplateService, IModelGeneratorService modelGeneratorService, ICompilerService compilerService, IFileWriter fileWriter)
+        public RepositoryGeneratorService(IRazorTemplateService razorTemplateService, ITableMetadataService tableMetadataService, IFileWriter fileWriter, ICacheService cacheService)
         {
+            _tableMetadataService = tableMetadataService;
             _razorTemplateService = razorTemplateService;
-            _modelGeneratorService = modelGeneratorService;
-            _compilerService = compilerService;
-            _fileWriter = fileWriter;
             _cacheService = cacheService;
+            _fileWriter = fileWriter;
         }
 
-        public void Generate(RepositoryGenerationContext context)
+        public void Generate(GenerationContext context)
         {
-            if (!context.ApplicationOptions.GenerateModels)
-            {
-                Logger.Info("Model generation is disabled. Model generation is required for all other generators at this time. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
-                return;
-            }
-
             if (!context.ApplicationOptions.GenerateRepositories)
             {
                 Logger.Info("Repository generation is disabled. Change the 'GenerateRepositories' option in the 'appsettings.json' file to enable.");
@@ -46,8 +37,12 @@ namespace CodeGeneration.Services.Generation.Repository
             }
 
             var options = context.ApplicationOptions.RepositoryGeneration;
+            var connectionKey = context.ApplicationOptions.SourceConnectionKey;
+            var database = context.ApplicationOptions.SourceDatabase;
+            var schema = context.ApplicationOptions.SourceSchema;
+            var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
 
-            var modelCache = _modelGeneratorService.GetCache();
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
@@ -55,35 +50,31 @@ namespace CodeGeneration.Services.Generation.Repository
                 var razorEngineKey = resource.ToRazorEngineKey();
                 var templateName = resource.ToTemplateName();
 
-                foreach (var modelCacheKvp in modelCache)
+                foreach (var tableMetadata in tableMetadataSet)
                 {
-                    var domainModelName = modelCacheKvp.Key;
-                    var domainModelSource = modelCacheKvp.Value;
-                    var cacheKey = _cacheService.BuildCacheKey(domainModelName, templateName);
+                    var modelName = tableMetadata.TableName.ToCamelCase();
+                    var cacheKey = _cacheService.BuildCacheKey(modelName, templateName);
 
-                    Logger.Info("Model Name: {0}", domainModelName);
+                    Logger.Info("Model Name: {0}", modelName);
                     Logger.Info("Embedded resource: {0}", resource);
                     Logger.Info("Razor Engine Key: {0}", razorEngineKey);
                     Logger.Info("Template Name: {0}", templateName);
 
-                    var domainModelType = _compilerService.GetCompiledTypeFromSource(domainModelName, domainModelSource);
-                    var templateModel = new ViewModelMetadata(templateName, domainModelType);
-
-                    string parsedCode;
+                    string parsedContents;
                     if (_cacheService.Exists(cacheKey))
                     {
                         Logger.Info("[CACHE HIT]: Repository code for {0} found in cache.", cacheKey);
-                        parsedCode = _cacheService.Get<string>(cacheKey);
+                        parsedContents = _cacheService.Get<string>(cacheKey);
                     }
                     else
                     {
                         Logger.Info("[CACHE MISS]: Repository code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
-                        parsedCode = _razorTemplateService.Process(razorEngineKey, templateModel);
-                        _cacheService.Set(cacheKey, parsedCode);
+                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
+                        _cacheService.Set(cacheKey, parsedContents);
                     }
 
-                    if (options.Output.GenerateOutput) WriteToFile(options.Output, domainModelName, templateName, parsedCode);
+                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedContents);
                 }
             }
         }

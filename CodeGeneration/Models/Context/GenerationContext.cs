@@ -2,7 +2,7 @@
 
 namespace CodeGeneration.Models.Context
 {
-    public class ModelGenerationContext
+    public class GenerationContext
     {
         public ApplicationOptions ApplicationOptions { get; set; }
     }
