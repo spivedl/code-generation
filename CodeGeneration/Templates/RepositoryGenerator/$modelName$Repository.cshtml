@@ -1,12 +1,11 @@
 ﻿@using System
 @using System.Linq
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Template
-@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 @{
     var tableName = Model.TableMetadata.TableName;
     var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
-    var rootNamespace = Model.Namespace.Substring(0, Model.Namespace.IndexOf('.'));
+    var rootNamespace = Model.TargetNamespace.Substring(0, Model.TargetNamespace.IndexOf('.'));
     var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
     var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
     var primaryKeyName = primaryKey != null ? primaryKey.ColumnName : "@(Model.ModelNameLower)Id";
@@ -16,10 +15,10 @@ using System.Collections.Generic;
 using System.Data;
 using Dapper;
 using @modelsNamespace;
-using @(Model.Namespace).Interfaces;
+using @(Model.TargetNamespace).Interfaces;
 using @(rootNamespace).Services.Data;
 
-namespace @(Model.Namespace).Dapper
+namespace @(Model.TargetNamespace).Dapper
 {
     /// <inheritdoc />
     /// <summary>

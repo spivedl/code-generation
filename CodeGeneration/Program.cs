@@ -12,6 +12,7 @@ using CodeGeneration.Services.Generation.Controller;
 using CodeGeneration.Services.Generation.Model;
 using CodeGeneration.Services.Generation.Repository;
 using CodeGeneration.Services.Generation.Sql;
+using CodeGeneration.Services.Generation.StaticFile;
 using CodeGeneration.Services.Generation.View;
 using CodeGeneration.Services.Process;
 using CodeGeneration.Services.Template.Razor;
@@ -46,14 +47,15 @@ namespace CodeGeneration
             container.RegisterType<TableMetadataService>().As<ITableMetadataService>().SingleInstance();
             container.RegisterType<FileReader>().As<IFileReader>().SingleInstance();
             container.RegisterType<FileWriter>().As<IFileWriter>().SingleInstance();
+            container.RegisterType<ProcessExecutorService>().As<IProcessExecutorService>().SingleInstance();
+            container.RegisterType<SqlCommandExecutorService>().As<ISqlCommandExecutorService>().SingleInstance();
+            container.RegisterType<RazorTemplateService>().As<IRazorTemplateService>().SingleInstance();
             container.RegisterType<ControllerGeneratorService>().As<IControllerGeneratorService>().SingleInstance();
             container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();
             container.RegisterType<RepositoryGeneratorService>().As<IRepositoryGeneratorService>().SingleInstance();
             container.RegisterType<SqlGeneratorService>().As<ISqlGeneratorService>().SingleInstance();
+            container.RegisterType<StaticFileGeneratorService>().As<IStaticFileGeneratorService>().SingleInstance();
             container.RegisterType<ViewGeneratorService>().As<IViewGeneratorService>().SingleInstance();
-            container.RegisterType<ProcessExecutorService>().As<IProcessExecutorService>().SingleInstance();
-            container.RegisterType<SqlCommandExecutorService>().As<ISqlCommandExecutorService>().SingleInstance();
-            container.RegisterType<RazorTemplateService>().As<IRazorTemplateService>().SingleInstance();
 
             // resolve an instance of the boot service and run it to kick off generation
             using (var scope = container.Build().BeginLifetimeScope())

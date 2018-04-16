@@ -1,118 +1,123 @@
-﻿@using System
-@using System.Linq
-@using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Template
-@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
+﻿@using CodeGeneration.Extensions
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.ControllerTemplateModel>
 @{
-    var tableName = Model.TableMetadata.TableName;
-    var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
-    var rootNamespace = Model.Namespace.Substring(0, Model.Namespace.IndexOf('.'));
-    var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
-    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
-    var primaryKeyName = primaryKey != null ? primaryKey.ColumnName : "@(Model.ModelNameLower)Id";
-    var primaryKeyNameLower = primaryKeyName.ToFirstCharLowerCase();
+    var repositoryInterface = @Model.ModelName.ToInterfaceName("Repository");
+    var repositoryPrivateVariable = @Model.ModelName.ToPrivateVariableName("Repository");
+    var repositoryVariable = @Model.ModelName.ToVariableName("Repository");
+    var modelParamName = @Model.ModelName.ToVariableName();
 }
 using System;
-using @modelsNamespace;
-using @(rootNamespace).Repositories.Interfaces;
+using @Model.ModelNamespace;
+using @(Model.RootNamespace).Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace @Model.Namespace
+namespace @Model.TargetNamespace
 {
     /// <inheritdoc />
     /// <summary>
-    /// Author: @RazorEngineExtensions.Author()
-    /// Version: @RazorEngineExtensions.Version()
-    /// Create Date: @DateTime.Now.ToString("f")
+    /// Author: @Model.Author
+    /// Version: @Model.Version
+    /// Create Date: @Model.CreateDate
     /// Description: Auto-generated controller for the @Model.ModelName model.
     /// </summary>
-    public class @(Model.ModelName)Controller : Controller
+    public class @Model.ClassName : Controller
     {
-        private readonly I@(Model.ModelName)Repository _@(modelNameLower)Repository;
-
-        public @(Model.ModelName)Controller(I@(Model.ModelName)Repository @(modelNameLower)Repository)
+        private readonly @repositoryInterface @repositoryPrivateVariable;
+        @foreach (var columnMetadata in @Model.ForeignKeyColumns)
         {
-            _@(modelNameLower)Repository = @(modelNameLower)Repository;
+            var entityName = columnMetadata.ColumnName.Replace("Id", "");
+        @:private readonly @entityName.ToInterfaceName("Repository") @entityName.ToPrivateVariableName("Repository");
+        }
+
+        public @(Model.ClassName)(@Model.ConstructorParameters)
+        {
+            @repositoryPrivateVariable = @repositoryVariable;
+        @foreach (var columnMetadata in @Model.ForeignKeyColumns)
+        {
+            var entityName = columnMetadata.ColumnName.Replace("Id","");
+            @:@entityName.ToPrivateVariableName("Repository") = @entityName.ToVariableName("Repository");
+        }
+        }
+
+        private void PopulateSelectLists()
+        {
+            @foreach (var columnMetadata in @Model.ForeignKeyColumns)
+            {
+                var entityName = columnMetadata.ColumnName.Replace("Id", "");
+            @:ViewBag.@(entityName)List = @(entityName.ToPrivateVariableName("Repository")).FindAll().ToSelectItems(x => new SelectListItem { Value = x.@(entityName)Id.ToString(), Text = x.Value });
+            }
         }
 
         public ActionResult Index()
         {
-            return View(_@(modelNameLower)Repository.FindAll());
+            return View(@(repositoryPrivateVariable).FindAll());
         }
 
         public ActionResult Create()
         {
+            PopulateSelectLists();
+
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(@(Model.ModelName) @(modelNameLower))
+        public ActionResult Create(@Model.ModelName @modelParamName)
         {
             try
             {
-                _@(modelNameLower)Repository.Create(@(modelNameLower));
+                @(repositoryPrivateVariable).Create(@modelParamName);
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
+                PopulateSelectLists();
                 ViewData["error"] = ex;
+
                 return View();
             }
         }
 
         public ActionResult Edit(int id)
         {
-            return View(_@(modelNameLower)Repository.FindOne(id));
+            PopulateSelectLists();
+
+            return View(@(repositoryPrivateVariable).FindOne(id));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(@(Model.ModelName) @(modelNameLower))
+        public ActionResult Edit(@Model.ModelName @modelParamName)
         {
             try
             {
-                _@(modelNameLower)Repository.Edit(@(modelNameLower));
+                @(repositoryPrivateVariable).Edit(@modelParamName);
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
+                PopulateSelectLists();
                 ViewData["error"] = ex;
-                return View(_@(modelNameLower)Repository.FindOne(@(modelNameLower).@(Model.ModelName)Id));
+
+                return View(@(repositoryPrivateVariable).FindOne(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName)));
             }
         }
 
         public ActionResult Delete(int id)
         {
-            return View(_@(modelNameLower)Repository.FindOne(id));
+            return View(@(repositoryPrivateVariable).FindOne(id));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(@(Model.ModelName) @(modelNameLower))
+        public ActionResult Delete(@Model.ModelName @modelParamName)
         {
             try
             {
-                _@(modelNameLower)Repository.Delete(@(modelNameLower).@(Model.ModelName)Id);
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ViewData["error"] = ex;
-                return View();
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteAll()
-        {
-            try
-            {
-                _@(modelNameLower)Repository.DeleteAll();
+                @(repositoryPrivateVariable).Delete(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName));
 
                 return RedirectToAction(nameof(Index));
             }

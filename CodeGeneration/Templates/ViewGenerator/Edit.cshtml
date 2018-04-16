@@ -1,15 +1,17 @@
-﻿@using CodeGeneration.Models.Metadata.Sql
-@using CodeGeneration.Models.Metadata.Template
-@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
+﻿@using CodeGeneration.Extensions
+@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@@model @(Model.TargetNamespace).@(Model.ModelName)
 
-@@model @(Model.Namespace).@(Model.ModelName)
+@@{
+ViewData["Title"] = "Edit @Model.ModelName.ToUpperDelimited()";
+}
+
 
 <div class="row justify-content-center">
-    <div class="col-6">
+    <div class="col-12">
         <div class="card">
-            <div class="text-center">
-                <h4 class="card-header bg-secondary text-white">Edit @Model.ModelName</h4>
-            </div>
+            <h4 class="card-header bg-dark text-white">Edit @Model.ModelName</h4>
             <div class="card-body">
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -20,12 +22,12 @@
                         if (columnMetadata.IsReadOnly) { continue; }
                         if (columnMetadata.IsPrimaryKey)
                         {
-                            <input type="hidden" asp-for="@propertyAccessor"/>
+                            <input type="hidden" asp-for="@propertyAccessor" />
                             continue;
                         }
                         if (columnMetadata.IsForeignKey)
                         {
-                            var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id","List"));
+                            var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
                             <div class="form-group">
                                 <label asp-for="@propertyAccessor"></label>
                                 <select asp-for="@propertyAccessor" class="form-control" asp-items="@itemSourceName"></select>
@@ -50,7 +52,7 @@
                     }
                     <div class="form-group">
                         <button type="submit" class="btn btn-lg btn-block btn-success">
-                            <i class="fas fa-save"></i> Create
+                            <i class="fas fa-save"></i> Save
                         </button>
                     </div>
                     <div class="form-group">

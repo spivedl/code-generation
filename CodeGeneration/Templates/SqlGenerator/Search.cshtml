@@ -30,11 +30,11 @@ CREATE PROCEDURE [@Model.Schema].[sp_search_@Model.TableName]
     @* This logic depends on the Columns being sorted by their OrdinalPostion *@
     if (column.OrdinalPosition > 1)
     {
-        @:, @column.GetParameterString()
+    @:, @column.GetParameterString(true)
     }
     else
     {
-        @:@column.GetParameterString()
+    @:@column.GetParameterString(true)
     }
 }
 AS
@@ -51,7 +51,7 @@ BEGIN
     }
     else
     {
-        @:SELECT [@column.ColumnName]
+    @:SELECT [@column.ColumnName]
     }
 }
     FROM [@Model.Schema].[@Model.TableName]
@@ -61,27 +61,27 @@ BEGIN
         {
             if (column.MaxLength > 0)
             {
-                @:AND (@@@column.ColumnName IS NULL OR [@column.ColumnName] LIKE '%' + @@@column.ColumnName + '%')
+    @:AND (@@@column.ColumnName IS NULL OR [@column.ColumnName] LIKE '%' + @@@column.ColumnName + '%')
             }
             else
             {
-                @:AND (@@@column.ColumnName IS NULL OR [@column.ColumnName] = @@@column.ColumnName)
+    @:AND (@@@column.ColumnName IS NULL OR [@column.ColumnName] = @@@column.ColumnName)
             }
         }
         else
         {
             if (column.MaxLength > 0)
             {
-                @:WHERE (@@@column.ColumnName IS NULL OR [@column.ColumnName] LIKE '%' + @@@column.ColumnName + '%')
+    @:WHERE (@@@column.ColumnName IS NULL OR [@column.ColumnName] LIKE '%' + @@@column.ColumnName + '%')
             }
             else
             {
-                @:WHERE (@@@column.ColumnName IS NULL OR [@column.ColumnName] = @@@column.ColumnName)
+    @:WHERE (@@@column.ColumnName IS NULL OR [@column.ColumnName] = @@@column.ColumnName)
             }
         }
     }
 
-    END
-    GO
+END
+GO
 
-    -------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@ using System.IO;
 using CodeGeneration.Extensions;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
-using CodeGeneration.Models.Metadata.Template;
+using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
@@ -30,12 +30,6 @@ namespace CodeGeneration.Services.Generation.View
 
         public void Generate(GenerationContext context)
         {
-            if (!context.ApplicationOptions.GenerateModels)
-            {
-                Logger.Info("Model generation is disabled. Model generation is required for all other generators at this time. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
-                return;
-            }
-
             if (!context.ApplicationOptions.GenerateViews)
             {
                 Logger.Info("View generation is disabled. Change the 'GenerateViews' option in the 'appsettings.json' file to enable.");
@@ -48,7 +42,7 @@ namespace CodeGeneration.Services.Generation.View
             var schema = context.ApplicationOptions.SourceSchema;
             var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
 
-            var tableMetadataCollection = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
@@ -56,7 +50,7 @@ namespace CodeGeneration.Services.Generation.View
                 var razorEngineKey = resource.ToRazorEngineKey();
                 var templateName = resource.ToTemplateName();
 
-                foreach (var tableMetadata in tableMetadataCollection)
+                foreach (var tableMetadata in tableMetadataSet)
                 {
                     var modelName = tableMetadata.TableName.ToCamelCase();
                     var cacheKey = _cacheService.BuildCacheKey(modelName, templateName);
@@ -76,9 +70,7 @@ namespace CodeGeneration.Services.Generation.View
                     {
                         Logger.Info("[CACHE MISS]: View code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
-                        var templateModel = new TemplateModelMetadata(connectionKey, options.Namespace, tableMetadata);
-
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, templateModel);
+                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
                         _cacheService.Set(cacheKey, parsedContents);
                     }
 

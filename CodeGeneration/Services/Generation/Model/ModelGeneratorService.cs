@@ -3,7 +3,7 @@ using System.IO;
 using CodeGeneration.Extensions;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
-using CodeGeneration.Models.Metadata.Template;
+using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
@@ -42,7 +42,7 @@ namespace CodeGeneration.Services.Generation.Model
             var schema = context.ApplicationOptions.SourceSchema;
             var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
 
-            var tableMetadataCollection = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
@@ -50,7 +50,7 @@ namespace CodeGeneration.Services.Generation.Model
                 var razorEngineKey = resource.ToRazorEngineKey();
                 var templateName = resource.ToTemplateName();
 
-                foreach (var tableMetadata in tableMetadataCollection)
+                foreach (var tableMetadata in tableMetadataSet)
                 {
                     var modelName = tableMetadata.TableName.ToCamelCase();
   
@@ -69,9 +69,7 @@ namespace CodeGeneration.Services.Generation.Model
                     {
                         Logger.Info("[CACHE MISS]: Model code for {0} NOT found in cache. Will process template and add to cache.", modelName);
 
-                        var templateModel = new TemplateModelMetadata(connectionKey, options.Namespace, tableMetadata);
-
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, templateModel);
+                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
                         _cacheService.Set(modelName, parsedContents);
                     }
 

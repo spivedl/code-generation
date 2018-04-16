@@ -1,24 +1,24 @@
 ﻿using CodeGeneration.Extensions;
 using CodeGeneration.Models.Metadata.Sql;
 
-namespace CodeGeneration.Models.Metadata.Template
+namespace CodeGeneration.Models.Template
 {
-    public class TemplateModelMetadata
+    public class TableMetadataTemplateModel
     {
         public string SourceConnectionKey { get; set; }
-        public string Namespace { get; set; }
+        public string TargetNamespace { get; set; }
         public string ModelName => TableMetadata?.TableName.ToCamelCase();
         public TableMetadata TableMetadata { get; set; }
 
-        public TemplateModelMetadata()
+        public TableMetadataTemplateModel()
         {
             
         }
 
-        public TemplateModelMetadata(string connectionKey, string ns, TableMetadata tableMetadata)
+        public TableMetadataTemplateModel(string connectionKey, string ns, TableMetadata tableMetadata)
         {
             SourceConnectionKey = connectionKey;
-            Namespace = ns;
+            TargetNamespace = ns;
             TableMetadata = tableMetadata;
         }
     }

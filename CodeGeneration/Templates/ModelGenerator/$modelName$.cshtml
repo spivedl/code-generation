@@ -1,11 +1,10 @@
 ﻿@using System
 @using CodeGeneration.Extensions
-@using CodeGeneration.Models.Metadata.Template
-@inherits RazorEngine.Templating.TemplateBase<TemplateModelMetadata>
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 using System;
 using System.ComponentModel;
 
-namespace @Model.Namespace
+namespace @Model.TargetNamespace
 {
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
@@ -17,12 +16,6 @@ namespace @Model.Namespace
     {
     @foreach (var column in @Model.TableMetadata.Columns)
     {
-        @*if (column.IsPrimaryKey){
-        @:[PrimaryKey]
-        }
-        if (column.IsForeignKey){
-        @:@Raw(string.Format("[ForeignKey(\"{0}List\")]", column.ColumnName.Replace("Id", "")))
-        }*@
         if (column.IsReadOnly){
         @:[ReadOnly(true)]
         }
