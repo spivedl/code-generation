@@ -219,12 +219,12 @@
     <EmbeddedResource Include="Templates\SqlGenerator\Insert.cshtml" />
     <EmbeddedResource Include="Templates\ControllerGenerator\%24modelName%24Controller.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Delete.cshtml" />
-    <EmbeddedResource Include="Templates\ViewGenerator\Details.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\Index.cshtml" />
     <EmbeddedResource Include="Templates\RepositoryGenerator\%24modelName%24Repository.cshtml" />
     <EmbeddedResource Include="Templates\RepositoryGenerator\I%24modelName%24Repository.cshtml" />
     <EmbeddedResource Include="Templates\StaticFileGenerator\_Layout.cshtml" />
     <EmbeddedResource Include="Templates\StaticFileGenerator\ICrudRepository.cshtml" />
+    <EmbeddedResource Include="Templates\ViewGenerator\_%24modelName%24Table.cshtml" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>

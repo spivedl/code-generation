@@ -3,6 +3,7 @@
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 using System;
 using System.ComponentModel;
+using Domain.Models.Pagination;
 
 namespace @Model.TargetNamespace
 {
@@ -12,7 +13,7 @@ namespace @Model.TargetNamespace
     /// Create Date: @DateTime.Now.ToString("f")
     /// Description: Auto-generated model for the @Model.TableMetadata.TableName table.
     /// </summary>
-    public class @Model.ModelName
+    public class @Model.ModelName : PagableModel
     {
     @foreach (var column in @Model.TableMetadata.Columns)
     {

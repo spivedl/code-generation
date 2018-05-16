@@ -1,74 +1,64 @@
 ﻿@using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@{
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+}
 @@model @(Model.TargetNamespace).@(Model.ModelName)
-
 @@{
-ViewData["Title"] = "Delete @Model.ModelName.ToUpperDelimited()";
+    ViewData["Title"] = "Delete @Model.ModelName.ToUpperDelimited()";
 }
 
-<div class="row justify-content-center">
-    <div class="col-12">
-        <div class="card">
-            <h4 class="card-header bg-dark text-white">Delete @Model.ModelName</h4>
-            <div class="card-body">
-                <form asp-action="Delete">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    @foreach (var columnMetadata in Model.TableMetadata.Columns)
-                    {
-                        var propertyAccessor = string.Format("{0}", columnMetadata.ColumnName);
-
-                        if (columnMetadata.IsReadOnly) { continue; }
-                        if (columnMetadata.IsPrimaryKey)
-                        {
-                            <input type="hidden" asp-for="@propertyAccessor" />
-                            continue;
-                        }
-                        if (columnMetadata.IsForeignKey)
-                        {
-                            var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
-                            <div class="form-group">
-                                <label asp-for="@propertyAccessor"></label>
-                                <select asp-for="@propertyAccessor" class="form-control" asp-items="@itemSourceName"></select>
-                                <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
-                            </div>
-                        }
-                        else if (columnMetadata.IsBooleanType())
-                        {
-                            <div class="form-check">
-                                <input asp-for="@propertyAccessor" readonly="readonly" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
-                                <label asp-for="@propertyAccessor" class="form-check-label"></label>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="form-group">
-                                <label asp-for="@propertyAccessor"></label>
-                                <input asp-for="@propertyAccessor" class="form-control" readonly="readonly" />
-                                <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
-                            </div>
-                        }
-                    }
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-lg btn-block btn-danger">
-                            <i class="fas fa-trash-alt"></i> Delete @Model.ModelName
-                        </button>
+@@using (Html.BeginForm("Delete", "@Model.ModelName", FormMethod.Post, new { role = "form" }))
+{
+    <div class="card shadow">
+        @@Html.Partial("_FormNavigationPartial")
+        <div class="card-body">
+            @@Html.AntiForgeryToken()
+            @@Html.HiddenFor(model => model.@Raw(GetValueExpression(primaryKey)))
+            @foreach (var columnMetadata in Model.TableMetadata.Columns)
+            {
+                var propertyAccessor = string.Format("{0}", columnMetadata.ColumnName);
+            
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
+                        <input id="@propertyAccessor" name="@propertyAccessor" class="form-control" type="text" value="@(GetModelExpression()).@(GetValueExpression(columnMetadata))" readonly="readonly" />
                     </div>
-                    <div class="form-group">
-                        <a asp-action="Index" class="btn btn-lg btn-block btn-secondary">
-                            Cancel
-                        </a>
-                    </div>
-                </form>
+                </div>
+            }
+        </div>
+        <div class="card-footer">
+            <div class="row sm-gutters">
+                <div class="col-2">
+                    <button type="submit" class="btn btn-block btn-lg btn-danger">
+                        <i class="fas fa-trash-alt"></i> Delete @Model.ModelName
+                    </button>
+                </div>
+                <div class="col-2">
+                    <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-lg btn-secondary">
+                        Cancel
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @functions
 {
     static string GetValueExpression(ColumnMetadata columnMetadata)
     {
         return columnMetadata.ColumnName;
+    }
+
+    static string GetUrlExpression(string actionName, string modelName)
+    {
+        return string.Format("@Url.Action(\"{0}\", \"{1}\")", actionName, modelName);
+    }
+
+    static string GetModelExpression()
+    {
+        return "@Model";
     }
 }

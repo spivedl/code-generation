@@ -1,5 +1,6 @@
 ﻿@using System
 @using System.Linq
+@using System.Text
 @using CodeGeneration.Extensions
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 @{
@@ -14,11 +15,13 @@
 using System.Collections.Generic;
 using System.Data;
 using Dapper;
-using @(rootNamespace).Models;
-using @(rootNamespace).Repositories.Interfaces;
-using @(rootNamespace).Services.Data;
+using Domain.Extensions;
+using Domain.Models;
+using Domain.Models.Pagination;
+using Domain.Repositories.Interfaces;
+using Domain.Services.Data;
 
-namespace @(rootNamespace).Repositories.Dapper
+namespace Domain.Repositories.Dapper
 {
     /// <inheritdoc />
     /// <summary>
@@ -40,14 +43,14 @@ namespace @(rootNamespace).Repositories.Dapper
 
         public @Model.ModelName Create(@Model.ModelName @modelNameLower)
         {
-            const string storedProcedure = @@"[@Model.TargetSchema].[sp_insert_@tableName]";
+            const string sql = @@"@Raw(GenerateInsertSql(@Model))";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
                 @(modelNameLower).@(primaryKeyName) = connection.QuerySingle<int>(
-                    storedProcedure,
+                    sql,
                     new
                     {
                     @foreach(var columnMetadata in @Model.TableMetadata.Columns)
@@ -56,7 +59,7 @@ namespace @(rootNamespace).Repositories.Dapper
                         @:@(modelNameLower).@(columnMetadata.ColumnName),
                     }
                     },
-                    commandType: CommandType.StoredProcedure);
+                    commandType: CommandType.Text);
 
                 return @modelNameLower;
             }
@@ -64,14 +67,14 @@ namespace @(rootNamespace).Repositories.Dapper
 
         public @Model.ModelName Edit(@Model.ModelName @modelNameLower)
         {
-            const string storedProcedure = @@"[@Model.TargetSchema].[sp_update_@tableName]";
+            const string sql = @@"@Raw(GenerateUpdateSql(@Model))";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
                 connection.Execute(
-                    storedProcedure,
+                    sql,
                     new
                     {
                     @foreach(var columnMetadata in @Model.TableMetadata.Columns)
@@ -80,7 +83,7 @@ namespace @(rootNamespace).Repositories.Dapper
                         @:@(modelNameLower).@(columnMetadata.ColumnName),
                     }
                     },
-                    commandType: CommandType.StoredProcedure);
+                    commandType: CommandType.Text);
 
                 return @modelNameLower;
             }
@@ -88,50 +91,288 @@ namespace @(rootNamespace).Repositories.Dapper
 
         public int Delete(int @primaryKeyNameLower)
         {
-            const string storedProcedure = @@"[@Model.TargetSchema].[sp_delete_@tableName]";
+            const string sql = @@"
+            DELETE 
+            FROM [@Model.TableMetadata.SourceDatabase].[@Model.TableMetadata.SourceSchema].[@Model.TableMetadata.TableName]
+            WHERE [@primaryKeyName] = @@@primaryKeyName;";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.Execute(storedProcedure, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.StoredProcedure);
+                return connection.Execute(sql, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.Text);
             }
         }
 
         public int DeleteAll()
         {
-            const string storedProcedure = "[@Model.TargetSchema].[sp_delete_@tableName]";
+            const string sql = @@"DELETE FROM [@Model.TableMetadata.SourceDatabase].[@Model.TableMetadata.SourceSchema].[@Model.TableMetadata.TableName];";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.Execute(storedProcedure, commandType: CommandType.StoredProcedure);
+                return connection.Execute(sql, commandType: CommandType.Text);
             }
         }
 
         public @Model.ModelName FindOne(int @primaryKeyNameLower)
         {
-            const string storedProcedure = @@"[@Model.TargetSchema].[sp_search_@tableName]";
+            const string sql = @@"@Raw(GenerateFindSql(@Model, true))";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.QuerySingle<@Model.ModelName>(storedProcedure, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.StoredProcedure);
+                return connection.QuerySingle<@Model.ModelName>(sql, new { @primaryKeyName = @primaryKeyNameLower }, commandType: CommandType.Text);
             }
         }
 
         public IEnumerable<@Model.ModelName> FindAll()
         {
-            const string storedProcedure = @@"[@Model.TargetSchema].[sp_search_@tableName]";
+            const string sql = @@"@Raw(GenerateFindSql(@Model, false))";
 
             using (var connection = Connection)
             {
                 if (connection.State != ConnectionState.Open) connection.Open();
 
-                return connection.Query<@Model.ModelName>(storedProcedure, commandType: CommandType.StoredProcedure);
+                return connection.Query<@Model.ModelName>(sql, commandType: CommandType.Text);
             }
         }
+
+        public IEnumerable<@Model.ModelName> Page(Pagination pagination)
+        {
+            const string sql = @@"@Raw(GeneratePaginationSql(@Model, false))";
+    
+            var finalSql = pagination.InjectSortParameters(typeof(@Model.ModelName), sql);
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+                if (pagination.PageSize == 0) return new List<@Model.ModelName>();
+
+                return connection.Query<@Model.ModelName>(finalSql,
+                    new
+                    {
+                        pagination.PageNumber,
+                        pagination.PageSize
+                    },
+                    commandType: CommandType.Text);
+            }
+        }
+
+        public IEnumerable<@Model.ModelName> Search(@Model.ModelName searchContext, Pagination pagination)
+        {
+            const string sql = @@"@Raw(GeneratePaginationSql(@Model, true))";
+    
+            var finalSql = pagination.InjectSortParameters(typeof(@Model.ModelName), sql);
+            using (var connection = Connection)
+            {
+                if (connection.State != ConnectionState.Open) connection.Open();
+                if (pagination.PageSize == 0) return new List<@Model.ModelName>();
+
+                return connection.Query<@Model.ModelName>(finalSql,
+                    new
+                    {
+                        pagination.PageNumber,
+                        pagination.PageSize,
+                    @foreach(var columnMetadata in @Model.TableMetadata.Columns)
+                    {
+                        @:searchContext.@(columnMetadata.ColumnName),
+                    }
+                    },
+                    commandType: CommandType.Text);
+            }
+        }
+    }
+}
+    
+@functions {
+
+    static string GenerateInsertSql(CodeGeneration.Models.Template.TableMetadataTemplateModel model)
+    {
+        var sbSql = new StringBuilder();
+
+        sbSql.AppendFormat("\nINSERT INTO [{0}].[{1}].[{2}]\n(", model.TableMetadata.SourceDatabase, model.TableMetadata.SourceSchema, model.TableMetadata.TableName);
+
+        var firstLine = true;
+        foreach (var columnMetadata in model.TableMetadata.Columns)
+        {
+            if (columnMetadata.IsPrimaryKey || columnMetadata.IsReadOnly) continue;
+            if (firstLine)
+            {
+                sbSql.AppendFormat("\t[{0}]\n", columnMetadata.ColumnName);
+            }
+            else
+            {
+                sbSql.AppendFormat("\t, [{0}]\n", columnMetadata.ColumnName);
+            }
+
+            firstLine = false;
+        }
+
+        sbSql.Append(")\nVALUES\n(");
+
+        firstLine = true;
+        foreach (var columnMetadata in model.TableMetadata.Columns)
+        {
+            if (columnMetadata.IsPrimaryKey || columnMetadata.IsReadOnly) continue;
+            if (firstLine)
+            {
+                sbSql.AppendFormat("\t@{0}\n", columnMetadata.ColumnName);
+            }
+            else
+            {
+                sbSql.AppendFormat("\t, @{0}\n", columnMetadata.ColumnName);
+            }
+
+            firstLine = false;
+        }
+
+        sbSql
+        .Append(");\n\n")
+        .Append("SELECT CAST(SCOPE_IDENTITY() AS INT);");
+
+        return sbSql.ToString();
+    }
+
+    static string GenerateUpdateSql(CodeGeneration.Models.Template.TableMetadataTemplateModel model)
+    {
+        var sbSql = new StringBuilder();
+        var primaryKeyColumn = model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+        var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", model.TableMetadata.TableName);
+        var hasModifiedDateColumn = model.TableMetadata.Columns.Exists(c => c.ColumnName.Equals("ModifiedDate"));
+
+        sbSql.AppendFormat("\nUPDATE [{0}].[{1}].[{2}]\n", model.TableMetadata.SourceDatabase, model.TableMetadata.SourceSchema, model.TableMetadata.TableName);
+
+        var firstLine = true;
+        foreach (var columnMetadata in model.TableMetadata.Columns)
+        {
+            if (columnMetadata.IsPrimaryKey || columnMetadata.IsReadOnly) continue;
+            if (firstLine)
+            {
+                sbSql.AppendFormat("SET [{0}] = @{0}\n", columnMetadata.ColumnName);
+            }
+            else
+            {
+                sbSql.AppendFormat("\t, [{0}] = @{0}\n", columnMetadata.ColumnName);
+            }
+
+            firstLine = false;
+        }
+
+        if (hasModifiedDateColumn) sbSql.Append("\t, [ModifiedDate] = GETDATE()\n");
+        sbSql.AppendFormat("WHERE [{0}] = @{0};", primaryKeyColumnName);
+
+        return sbSql.ToString();
+    }
+
+    static string GenerateFindSql(CodeGeneration.Models.Template.TableMetadataTemplateModel model, bool isFindOne)
+    {
+        var sbSql = new StringBuilder();
+        var primaryKeyColumn = model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+        var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", model.TableMetadata.TableName);
+
+        var firstLine = true;
+        foreach (var columnMetadata in model.TableMetadata.Columns)
+        {
+            if (firstLine)
+            {
+                sbSql.AppendFormat("\nSELECT [{0}]\n", columnMetadata.ColumnName);
+            }
+            else
+            {
+                sbSql.AppendFormat("\t, [{0}]\n", columnMetadata.ColumnName);
+            }
+
+            firstLine = false;
+        }
+
+        sbSql.AppendFormat("FROM [{0}].[{1}].[{2}]", model.TableMetadata.SourceDatabase, model.TableMetadata.SourceSchema, model.TableMetadata.TableName);
+
+        if (isFindOne) sbSql.AppendFormat("\nWHERE [{0}] = @{0}", primaryKeyColumnName);
+
+        sbSql.Append(";");
+
+        return sbSql.ToString();
+    }
+
+    static string GeneratePaginationSql(CodeGeneration.Models.Template.TableMetadataTemplateModel model, bool includeSearchSql)
+    {
+        var sbSql = new StringBuilder();
+        var primaryKeyColumn = model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+        var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", model.TableMetadata.TableName);
+        var fqTableName = string.Format("[{0}].[{1}].[{2}]", model.TableMetadata.SourceDatabase, model.TableMetadata.SourceSchema, model.TableMetadata.TableName);
+
+        #region FILTER SQL
+
+        sbSql.Append("\n;WITH _filter AS\n(\n")
+            .AppendFormat("\tSELECT [{0}]\n", primaryKeyColumnName)
+            .AppendFormat("\tFROM {0} \n", fqTableName);
+
+        if (includeSearchSql)
+        {
+            var firstLine = true;
+            foreach (var columnMetadata in model.TableMetadata.Columns)
+            {
+                if (columnMetadata.IsPrimaryKey) continue;
+                if (firstLine)
+                {
+                    if (columnMetadata.MaxLength > 0)
+                    {
+                        sbSql.AppendFormat("\tWHERE (@{0} IS NULL OR [{0}] LIKE '%' + @{0} + '%')\n", columnMetadata.ColumnName);
+                    }
+                    else
+                    {
+                        sbSql.AppendFormat("\tWHERE (@{0} IS NULL OR [{0}] = @{0})\n", columnMetadata.ColumnName);
+                    }
+                }
+                else
+                {
+                    if (columnMetadata.MaxLength > 0)
+                    {
+                        sbSql.AppendFormat("\t\tAND (@{0} IS NULL OR [{0}] LIKE '%' + @{0} + '%')\n", columnMetadata.ColumnName);
+                    }
+                    else
+                    {
+                        sbSql.AppendFormat("\t\tAND (@{0} IS NULL OR [{0}] = @{0})\n", columnMetadata.ColumnName);
+                    }
+                }
+
+                firstLine = false;
+            }
+        }
+
+        #endregion
+
+        #region PAGE SQL
+        sbSql
+            .Append(")\n, _page AS\n(\n")
+            .AppendFormat("\tSELECT [{0}]\n", primaryKeyColumnName)
+            .AppendFormat("\tFROM {0} x\n", fqTableName);
+
+        if (includeSearchSql) sbSql.AppendFormat("\tWHERE EXISTS (SELECT 1 FROM _filter WHERE _filter.[{0}] = x.[{0}])\n", primaryKeyColumnName);
+
+        sbSql
+            .Append("\tORDER BY @SortExpression @SortDirection\n")
+            .Append("\tOFFSET @PageSize * (@PageNumber - 1) ROWS\n")
+            .Append("\tFETCH NEXT @PageSize ROWS ONLY\n")
+            .Append(")\n");
+
+        #endregion
+
+        #region SELECT SQL
+
+        sbSql.AppendFormat("SELECT (SELECT COUNT([{0}]) FROM _filter) AS [TotalItems]\n", primaryKeyColumnName);
+        foreach (var columnMetadata in model.TableMetadata.Columns)
+        {
+            sbSql.AppendFormat("\t, [{0}]\n", columnMetadata.ColumnName);
+        }
+        sbSql
+            .AppendFormat("FROM {0} x\n", fqTableName)
+            .AppendFormat("WHERE EXISTS (SELECT 1 FROM _page WHERE _page.[{0}] = x.[{0}])\n", primaryKeyColumnName)
+            .Append("ORDER BY @SortExpression @SortDirection;"); 
+        #endregion
+
+        return sbSql.ToString();
     }
 }

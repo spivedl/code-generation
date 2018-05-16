@@ -78,5 +78,10 @@ namespace CodeGeneration.Models.Metadata.Sql
         {
             return SqlDataTypeConverter.GetType(DataType) == typeof(bool);
         }
+
+        public bool IsDateTimeType()
+        {
+            return SqlDataTypeConverter.GetType(DataType) == typeof(System.DateTime);
+        }
     }
 }

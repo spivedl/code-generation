@@ -79,7 +79,8 @@ namespace CodeGeneration.Services.Generation.View
         {
             var basePath = options.Path;
             var extension = options.Extension;
-            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName, templateName), extension);
+            var fileName = $"{templateName}".Replace("$modelName$", modelName);
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, modelName, fileName), extension);
 
             Logger.Info("Writing generated VIEW to output file at '{0}'.", fullPath);
             _fileWriter.WriteAllText(fullPath, contents);

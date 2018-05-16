@@ -6,12 +6,15 @@
     var repositoryVariable = @Model.ModelName.ToVariableName("Repository");
     var modelParamName = @Model.ModelName.ToVariableName();
     var hasForeignRelations = @Model.ForeignKeyColumns.Any();
+    var primaryKeyName = @Model.PrimaryKeyColumn != null ? @Model.PrimaryKeyColumn.ColumnName : "@(Model.ModelName)Id";
 }
 using System;
-using @Model.ModelNamespace;
-using @(Model.RootNamespace).Repositories.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Web.Mvc;
+using ControlPanel.Infrastructure.Extensions;
+using ControlPanel.Models.View;
+using Domain.Repositories.Interfaces;
+using Domain.Models;
+using Domain.Models.Pagination;
 
 namespace @Model.TargetNamespace
 {
@@ -55,7 +58,48 @@ namespace @Model.TargetNamespace
 
         public ActionResult Index()
         {
-            return View(@(repositoryPrivateVariable).FindAll());
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Index(Pagination pagination)
+        {
+            // setting ViewBag.InstanceId is only necessary if a page has multiple instances of pagination
+            // that need to operate independently from each other
+            ViewBag.InstanceId = pagination.InstanceId;
+
+            try
+            {
+                var pageResults = @(repositoryPrivateVariable).Page(pagination);
+                var tableHtml = this.RenderPartialView("_@(Model.ModelName)Table", new PagableViewModel<@Model.ModelName>(pageResults, pagination));
+                var paginationHtml = this.RenderPartialView("_PaginationPartial", pagination);
+
+                return new JsonResult
+                {
+                    Data = new JsonResultDataModel
+                    {
+                        json = new
+                        {
+                            tableHtml,
+                            paginationHtml,
+                            totalItems = pagination.TotalItems,
+                            totalPages = pagination.TotalPages
+                        }
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult
+                {
+                    Data = new JsonResultDataModel
+                    {
+                        success = false,
+                        error = ex.Message
+                    }
+                };
+            }
         }
 
         public ActionResult Create()
@@ -75,7 +119,8 @@ namespace @Model.TargetNamespace
             try
             {
                 @(repositoryPrivateVariable).Create(@modelParamName);
-
+    
+                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -84,8 +129,7 @@ namespace @Model.TargetNamespace
                 {
                 @:PopulateSelectLists();
                 }
-                ViewData["error"] = ex;
-
+                TempData["error"] = ex;
                 return View();
             }
         }
@@ -96,8 +140,16 @@ namespace @Model.TargetNamespace
             {
             @:PopulateSelectLists();
             }
-
-            return View(@(repositoryPrivateVariable).FindOne(id));
+    
+            try 
+            {
+                return View(@(repositoryPrivateVariable).FindOne(id));
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = ex;
+                return RedirectToAction("Error","Security");
+            }
         }
 
         [HttpPost]
@@ -107,7 +159,8 @@ namespace @Model.TargetNamespace
             try
             {
                 @(repositoryPrivateVariable).Edit(@modelParamName);
-
+    
+                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' edited successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -116,15 +169,22 @@ namespace @Model.TargetNamespace
                 {
                 @:PopulateSelectLists();
                 }
-                ViewData["error"] = ex;
-
+                TempData["error"] = ex;
                 return View(@(repositoryPrivateVariable).FindOne(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName)));
             }
         }
 
         public ActionResult Delete(int id)
         {
-            return View(@(repositoryPrivateVariable).FindOne(id));
+            try 
+            {
+                return View(@(repositoryPrivateVariable).FindOne(id));
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = ex;
+                return RedirectToAction("Error","Security");
+            }
         }
 
         [HttpPost]
@@ -134,12 +194,13 @@ namespace @Model.TargetNamespace
             try
             {
                 @(repositoryPrivateVariable).Delete(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName));
-
+    
+                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ViewData["error"] = ex;
+                TempData["error"] = ex;
                 return View();
             }
         }

@@ -1,75 +1,138 @@
 ﻿@using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@{
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+}
 @@model @(Model.TargetNamespace).@(Model.ModelName)
-
 @@{
-ViewData["Title"] = "Edit @Model.ModelName.ToUpperDelimited()";
+    ViewData["Title"] = "Edit @Model.ModelName.ToUpperDelimited()";
 }
 
+@@using (Html.BeginForm("Edit", "@Model.ModelName", FormMethod.Post, new { role = "form" }))
+{
+<div class="card shadow">
+    @@Html.Partial("_FormNavigationPartial")
+    <div class="card-body">
+        @@Html.AntiForgeryToken()
+        @@Html.HiddenFor(model => model.@Raw(GetValueExpression(primaryKey)))
+        @@Html.Partial("_ValidationSummary", ViewData.ModelState)
+        @foreach (var columnMetadata in Model.TableMetadata.Columns)
+        {
+            var propertyAccessor = string.Format("{0}", columnMetadata.ColumnName);
 
-<div class="row justify-content-center">
-    <div class="col-12">
-        <div class="card">
-            <h4 class="card-header bg-dark text-white">Edit @Model.ModelName</h4>
-            <div class="card-body">
-                <form asp-action="Edit">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    @foreach (var columnMetadata in Model.TableMetadata.Columns)
-                    {
-                        var propertyAccessor = string.Format("{0}", columnMetadata.ColumnName);
-
-                        if (columnMetadata.IsReadOnly) { continue; }
-                        if (columnMetadata.IsPrimaryKey)
-                        {
-                            <input type="hidden" asp-for="@propertyAccessor" />
-                            continue;
-                        }
-                        if (columnMetadata.IsForeignKey)
-                        {
-                            var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
-                            <div class="form-group">
-                                <label asp-for="@propertyAccessor"></label>
-                                <select asp-for="@propertyAccessor" class="form-control" asp-items="@itemSourceName"></select>
-                                <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
+            if (columnMetadata.IsPrimaryKey || columnMetadata.IsReadOnly) { continue; }
+            if (columnMetadata.IsForeignKey)
+            {
+                var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
+                        <select id="@propertyAccessor" name="@propertyAccessor" class="form-control"
+                                placeholder="Select a @propertyAccessor.ToUpperDelimited()..."
+                                data-select="true"
+                                data-select-allow-clear="true">
+                            @@foreach(var item in @itemSourceName)
+                            {{
+                                <option value="item.Value">item.Text</option>
+                            }}
+                        </select>
+                        @@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
+                    </div>
+                </div>
+            }
+            else if (columnMetadata.IsBooleanType())
+            {
+                <div class="form-row">
+                    <div class="form-check col">
+                        <input id="@propertyAccessor" name="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
+                        <label for="@propertyAccessor" class="form-check-label"></label>
+                    </div>
+                </div>
+            }
+            else if (columnMetadata.IsDateTimeType())
+            {
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                </span>
                             </div>
-                        }
-                        else if (columnMetadata.IsBooleanType())
-                        {
-                            <div class="form-check">
-                                <input asp-for="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
-                                <label asp-for="@propertyAccessor" class="form-check-label"></label>
+                            <input id="@propertyAccessor" name="@propertyAccessor" type="datetime" class="form-control"
+                                    data-datepicker="true"
+                                    data-date-format="%Y-%m-%d %T"
+                                   data-date-init="@@Model.@(GetValueExpression(columnMetadata)).ToString("yyyy-MM-dd HH:mm:ss")"
+                                    data-val="true"
+                                    data-val-date="The field @propertyAccessor must be a date."
+                                    data-val-required="The @propertyAccessor field is required.">
+                            <div class="input-group-append">
+                                <span class="input-group-text btn btn-dark" data-date-now="@propertyAccessor">
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                </span>
                             </div>
+                            <div class="input-group-append">
+                                <span class="input-group-text btn btn-dark" data-date-reset="@propertyAccessor">
+                                    <i class="fas fa-times" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                        @@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
+                        @if (columnMetadata.IsNullable)
+                        {
+                            <input id="@propertyAccessor" name="@propertyAccessor" class="form-control" type="text" value="@(GetModelExpression()).@(GetValueExpression(columnMetadata))"/>
                         }
                         else
                         {
-                            <div class="form-group">
-                                <label asp-for="@propertyAccessor"></label>
-                                <input asp-for="@propertyAccessor" class="form-control" />
-                                <span asp-validation-for="@propertyAccessor" class="text-danger"></span>
-                            </div>
+                            <input id="@propertyAccessor" name="@propertyAccessor" class="form-control" type="text" value="@(GetModelExpression()).@(GetValueExpression(columnMetadata))" data-val="true" data-val-required="The @propertyAccessor field is required." />
+                            @:@@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
                         }
-                    }
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-lg btn-block btn-success">
-                            <i class="fas fa-save"></i> Save
-                        </button>
                     </div>
-                    <div class="form-group">
-                        <a asp-action="Index" class="btn btn-lg btn-block btn-secondary">
-                            Cancel
-                        </a>
-                    </div>
-                </form>
+                </div>
+            }
+        }
+    </div>
+    <div class="card-footer">
+        <div class="row sm-gutters">
+            <div class="col-2">
+                <button type="submit" class="btn btn-block btn-lg btn-success">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+            <div class="col-2">
+                <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-lg btn-secondary">
+                    Cancel
+                </a>
             </div>
         </div>
     </div>
 </div>
+}
 
 @functions
 {
     static string GetValueExpression(ColumnMetadata columnMetadata)
     {
         return columnMetadata.ColumnName;
+    }
+
+    static string GetUrlExpression(string actionName, string modelName)
+    {
+        return string.Format("@Url.Action(\"{0}\", \"{1}\")", actionName, modelName);
+    }
+
+    static string GetModelExpression()
+    {
+        return "@Model";
     }
 }

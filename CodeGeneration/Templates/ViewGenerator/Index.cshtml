@@ -9,72 +9,39 @@
     var primaryKeyNameLower = primaryKeyName.ToFirstCharLowerCase();
 }
 @@model @Raw(GetEnumerableTypeExpression(@Model.TargetNamespace, @Model.ModelName))
-
 @@{
     ViewData["Title"] = "@Model.ModelName.ToUpperDelimited() List";
 }
 
-<div class="row justify-content-center">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <div class="row">
-                    <div class="col-10">
-                        <h4>@Model.ModelName List</h4>
-                    </div>
-                    <div class="col-2">
-                        <a href="@Raw(GetUrlExpression("Create", Model.ModelName))" class="btn btn-block btn-success font-weight-bold">
-                            <i class="fas fa-pencil-alt"></i> Create @Model.ModelName
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            @foreach (var columnMetadata in Model.TableMetadata.Columns)
-                            {
-                                if (columnMetadata.IsPrimaryKey || columnMetadata.IsForeignKey) { continue; }
-                                <th scope="col">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</th>
-                            }
-                            <th scope="col" colspan="2" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @@if(Model.Any()){
-                        foreach(var @modelNameLower in Model){
-                        <tr>
-                            @foreach (var columnMetadata in Model.TableMetadata.Columns)
-                            {
-                                if (columnMetadata.IsPrimaryKey || columnMetadata.IsForeignKey) { continue; }
-                                <td>@@Html.DisplayFor(model => @(modelNameLower).@GetValueExpression(columnMetadata))</td>
-                            }
-                            <td>
-                                <a href="@Raw(GetUrlExpression("Edit", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-primary">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            </td>
-                            <td>
-                                <a href="@Raw(GetUrlExpression("Delete", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-danger">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </a>
-                            </td>
-                        </tr>
-                        }
-                        } else {
-                        <tr>
-                            <td class="text-center" colspan="@(Model.TableMetadata.Columns.Count + 2)">
-                                <strong>No records found...</strong>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="card shadow">
+    @@Html.Partial("_FormNavigationPartial")
+    <div class="card-header">
+        <div data-instance-id="pagination" data-role="pagination-controls"></div>
+    </div>
+    <div class="table-responsive">
+        <div data-instance-id="pagination" data-role="table"></div>
+    </div>
+    <div class="card-footer">
+        <div data-instance-id="pagination" data-role="pagination-controls"></div>
     </div>
 </div>
+
+@@Html.AntiForgeryToken()
+@@section scripts {
+<script type="text/javascript">
+        var pagination = new Pagination({
+            antiForgeryToken: {
+                identifier: "__RequestVerificationToken",
+                value: $("input[name=__RequestVerificationToken]").val()
+            },
+            postUrl: "@Raw(GetUrlExpression("Index", @Model.ModelName))",
+            sortExpression: "@primaryKeyName",
+            sortDirection: "asc"
+        });
+
+        pagination.updateTable();
+</script>
+}
 
 @functions
 {

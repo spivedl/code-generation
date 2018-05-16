@@ -1,0 +1,70 @@
+﻿@using CodeGeneration.Models.Metadata.Sql
+@inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
+@{
+    var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+}
+@@using ControlPanel.Infrastructure.Extensions
+@@model Domain.Models.Pagination.PagableViewModel<Domain.Models.@Model.ModelName>
+@@{
+    Layout = null;
+    var paginationInstanceId = @@ViewBag.InstanceId ?? "pagination";
+}
+<table class="table table-bordered table-sm table-sortable mb-0" data-instance-id="@@paginationInstanceId" data-role="table">
+    <thead class="thead-light">
+        <tr>
+            @foreach (var columnMetadata in Model.TableMetadata.Columns)
+            {
+                <th data-instance-id="@@paginationInstanceId" data-role="sort" data-column="@columnMetadata.ColumnName">
+                    @@Html.SortIconFor(Model.Pagination, "@columnMetadata.ColumnName")
+                    @@Html.DisplayNameFor(model => model.PagableModel.@(columnMetadata.ColumnName))
+                </th>
+            }
+            <th colspan="2" class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @@if (Model.Items.Any())
+        {
+        foreach (var item in Model.Items)
+        {
+        <tr>
+            @foreach (var columnMetadata in Model.TableMetadata.Columns)
+            {
+                <td>@@Html.DisplayFor(model => item.@(Raw(GetValueExpression(columnMetadata))))</td>
+            }
+            <td>
+                <a href="@Raw(GetUrlExpression("Edit", @Model.ModelName, primaryKey.ColumnName))" target="_blank" class="btn btn-sm btn-block btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </td>
+            <td>
+                <a href="@Raw(GetUrlExpression("Delete", @Model.ModelName, primaryKey.ColumnName))" target="_blank" class="btn btn-sm btn-block btn-danger">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </a>
+            </td>
+        </tr>
+        }
+        }
+        else
+        {
+        <tr>
+            <td class="text-center" colspan="100">
+                <strong>No records found...</strong>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@functions
+{
+    static string GetValueExpression(ColumnMetadata columnMetadata)
+    {
+        return columnMetadata.ColumnName;
+    }
+
+    static string GetUrlExpression(string actionName, string modelName, string primaryKeyName)
+    {
+        return string.Format("@Url.Action(\"{0}\", \"{1}\", new {{ id = item.{2} }})", actionName, modelName, primaryKeyName);
+    }
+}
