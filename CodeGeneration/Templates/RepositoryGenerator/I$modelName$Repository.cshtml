@@ -3,11 +3,10 @@
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 @{
     var rootNamespace = Model.TargetNamespace.Substring(0, Model.TargetNamespace.IndexOf('.'));
-    var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
 }
-using @modelsNamespace;
+using @(rootNamespace).Models;
 
-namespace @(Model.TargetNamespace).Interfaces
+namespace @(rootNamespace).Repositories.Interfaces
 {
     /// <inheritdoc />
     /// <summary>

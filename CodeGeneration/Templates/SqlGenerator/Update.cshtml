@@ -3,20 +3,19 @@
 @using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<TableMetadata>
-
 @{
+    var lines = 0;
     var primaryKeyColumn = Model.Columns.FirstOrDefault(c => c.IsPrimaryKey);
     var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", Model.TableName);
     var hasModifiedDateColumn = Model.Columns.Exists(c => c.ColumnName.Equals("ModifiedDate"));
 }
+RAISERROR('Creating stored procedure [@Model.TargetSchema].[sp_update_@Model.TableName.ToLowerDelimited()]', 10, 1)
 
-RAISERROR('Creating stored procedure [@Model.Schema].[sp_update_@Model.TableName]', 10, 1)
+USE [@Model.SourceDatabase]
 
-USE [@Model.Database]
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.Schema].[sp_update_@Model.TableName]') AND type in (N'P', N'PC'))
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.TargetSchema].[sp_update_@Model.TableName.ToLowerDelimited()]') AND type in (N'P', N'PC'))
 BEGIN
-DROP PROCEDURE [@Model.Schema].[sp_update_@Model.TableName]
+DROP PROCEDURE [@Model.TargetSchema].[sp_update_@Model.TableName.ToLowerDelimited()]
 END
 
 SET ANSI_NULLS ON
@@ -28,14 +27,13 @@ GO
 -- Version:		@RazorEngineExtensions.Version()
 -- Author:		@RazorEngineExtensions.Author()
 -- Create date: @DateTime.Now.ToString("f")
--- Description:	Auto-generated UPDATE stored procedure for table [@Model.Schema].[@Model.TableName].
+-- Description:	Auto-generated UPDATE stored procedure for table [@Model.TargetSchema].[@Model.TableName.ToLowerDelimited()].
 -- =============================================
-CREATE PROCEDURE [@Model.Schema].[sp_update_@Model.TableName]
+CREATE PROCEDURE [@Model.TargetSchema].[sp_update_@Model.TableName.ToLowerDelimited()]
 @foreach (var column in @Model.Columns)
 {
     if (column.IsReadOnly) { continue; }
-    @* This logic depends on the Columns being sorted by their OrdinalPostion *@
-    if (column.OrdinalPosition > 1)
+    if (lines > 0)
     {
     @:, @column.GetParameterString()
     }
@@ -43,6 +41,8 @@ CREATE PROCEDURE [@Model.Schema].[sp_update_@Model.TableName]
     {
     @:@column.GetParameterString()
     }
+
+    lines++;
 }
 AS
 BEGIN
@@ -50,11 +50,12 @@ BEGIN
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
-    UPDATE [@Model.Schema].[@Model.TableName]
+    UPDATE [@Model.SourceSchema].[@Model.TableName]
+@{ lines = 0; }
     @foreach (var column in @Model.Columns)
     {
         if (column.IsPrimaryKey || column.IsReadOnly) { continue; }
-        if (column.OrdinalPosition > 2)
+        if (@Model.Columns.Count > 2 && column.OrdinalPosition > 2)
         {
         @:, [@column.ColumnName] = @@@column.ColumnName
         }
@@ -62,6 +63,8 @@ BEGIN
         {
     @:SET [@column.ColumnName] = @@@column.ColumnName
         }
+
+        lines++;
     }
     @if (hasModifiedDateColumn)
     {

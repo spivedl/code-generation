@@ -9,13 +9,13 @@
     var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", Model.TableName);
 }
 
-RAISERROR('Creating stored procedure [@Model.Schema].[sp_delete_@Model.TableName]', 10, 1)
+RAISERROR('Creating stored procedure [@Model.TargetSchema].[sp_delete_@Model.TableName.ToLowerDelimited()]', 10, 1)
 
-USE [@Model.Database]
+USE [@Model.SourceDatabase]
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.Schema].[sp_delete_@Model.TableName]') AND type in (N'P', N'PC'))
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.TargetSchema].[sp_delete_@Model.TableName.ToLowerDelimited()]') AND type in (N'P', N'PC'))
 BEGIN
-DROP PROCEDURE [@Model.Schema].[sp_delete_@Model.TableName]
+DROP PROCEDURE [@Model.TargetSchema].[sp_delete_@Model.TableName.ToLowerDelimited()]
 END
 
 SET ANSI_NULLS ON
@@ -27,9 +27,9 @@ GO
 -- Version:		@RazorEngineExtensions.Version()
 -- Author:		@RazorEngineExtensions.Author()
 -- Create date: @DateTime.Now.ToString("f")
--- Description:	Auto-generated DELETE stored procedure for table [@Model.Schema].[@Model.TableName].
+-- Description:	Auto-generated DELETE stored procedure for table [@Model.TargetSchema].[@Model.TableName.ToLowerDelimited()].
 -- =============================================
-CREATE PROCEDURE [@Model.Schema].[sp_delete_@Model.TableName]
+CREATE PROCEDURE [@Model.TargetSchema].[sp_delete_@Model.TableName.ToLowerDelimited()]
 @@@primaryKeyColumnName INT
 AS
 BEGIN
@@ -38,7 +38,7 @@ BEGIN
     SET NOCOUNT ON;
 
     DELETE
-    FROM [@Model.Schema].[@Model.TableName]
+    FROM [@Model.SourceSchema].[@Model.TableName]
     WHERE [@primaryKeyColumnName] = @@@primaryKeyColumnName
 
 END

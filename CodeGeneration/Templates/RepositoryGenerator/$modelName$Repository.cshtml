@@ -3,7 +3,7 @@
 @using CodeGeneration.Extensions
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 @{
-    var tableName = Model.TableMetadata.TableName;
+    var tableName = Model.TableMetadata.TableName.ToLowerDelimited();
     var modelNameLower = Model.ModelName.ToFirstCharLowerCase();
     var rootNamespace = Model.TargetNamespace.Substring(0, Model.TargetNamespace.IndexOf('.'));
     var modelsNamespace = string.Format("{0}.Models.Domain", rootNamespace);
@@ -14,11 +14,11 @@
 using System.Collections.Generic;
 using System.Data;
 using Dapper;
-using @modelsNamespace;
-using @(Model.TargetNamespace).Interfaces;
+using @(rootNamespace).Models;
+using @(rootNamespace).Repositories.Interfaces;
 using @(rootNamespace).Services.Data;
 
-namespace @(Model.TargetNamespace).Dapper
+namespace @(rootNamespace).Repositories.Dapper
 {
     /// <inheritdoc />
     /// <summary>
@@ -40,7 +40,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public @Model.ModelName Create(@Model.ModelName @modelNameLower)
         {
-            const string storedProcedure = @@"[main].[sp_insert_@tableName]";
+            const string storedProcedure = @@"[@Model.TargetSchema].[sp_insert_@tableName]";
 
             using (var connection = Connection)
             {
@@ -64,7 +64,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public @Model.ModelName Edit(@Model.ModelName @modelNameLower)
         {
-            const string storedProcedure = @@"[main].[sp_update_@tableName]";
+            const string storedProcedure = @@"[@Model.TargetSchema].[sp_update_@tableName]";
 
             using (var connection = Connection)
             {
@@ -88,7 +88,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public int Delete(int @primaryKeyNameLower)
         {
-            const string storedProcedure = @@"[main].[sp_delete_@tableName]";
+            const string storedProcedure = @@"[@Model.TargetSchema].[sp_delete_@tableName]";
 
             using (var connection = Connection)
             {
@@ -100,7 +100,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public int DeleteAll()
         {
-            const string storedProcedure = "[main].[sp_delete_@tableName]";
+            const string storedProcedure = "[@Model.TargetSchema].[sp_delete_@tableName]";
 
             using (var connection = Connection)
             {
@@ -112,7 +112,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public @Model.ModelName FindOne(int @primaryKeyNameLower)
         {
-            const string storedProcedure = @@"[main].[sp_search_@tableName]";
+            const string storedProcedure = @@"[@Model.TargetSchema].[sp_search_@tableName]";
 
             using (var connection = Connection)
             {
@@ -124,7 +124,7 @@ namespace @(Model.TargetNamespace).Dapper
 
         public IEnumerable<@Model.ModelName> FindAll()
         {
-            const string storedProcedure = @@"[main].[sp_search_@tableName]";
+            const string storedProcedure = @@"[@Model.TargetSchema].[sp_search_@tableName]";
 
             using (var connection = Connection)
             {

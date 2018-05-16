@@ -4,24 +4,29 @@ namespace CodeGeneration.Models.Metadata.Sql
 {
     public class TableMetadata
     {
-        public string Database { get; set; }
-        public string Schema { get; set; }
+        public string SourceDatabase { get; set; }
+        public string SourceSchema { get; set; }
+        public string TargetDatabase { get; set; }
+        public string TargetSchema { get; set; }
         public string TableName { get; set; }
         public List<ColumnMetadata> Columns { get; set; }
         public List<RelationshipMetadata> Relationships { get; set; }
         public Dictionary<string, string> TableAbbreviations { get; set; }
 
-        public TableMetadata()
+        public TableMetadata() : this(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty)
         {
-            Columns = new List<ColumnMetadata>();
-            Relationships = new List<RelationshipMetadata>();
-            TableAbbreviations = new Dictionary<string, string>();
         }
 
-        public TableMetadata(string database, string schema, string tableName)
+        public TableMetadata(string sourceDatabase, string sourceSchema, string tableName) : this(sourceDatabase, sourceSchema, sourceDatabase, sourceSchema, tableName)
         {
-            Database = database;
-            Schema = schema;
+        }
+
+        public TableMetadata(string sourceDatabase, string sourceSchema, string targetDatabase, string targetSchema, string tableName)
+        {
+            SourceDatabase = sourceDatabase;
+            SourceSchema = sourceSchema;
+            TargetDatabase = targetDatabase;
+            TargetSchema = targetSchema;
             TableName = tableName;
 
             Columns = new List<ColumnMetadata>();

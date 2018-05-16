@@ -5,6 +5,7 @@
     var repositoryPrivateVariable = @Model.ModelName.ToPrivateVariableName("Repository");
     var repositoryVariable = @Model.ModelName.ToVariableName("Repository");
     var modelParamName = @Model.ModelName.ToVariableName();
+    var hasForeignRelations = @Model.ForeignKeyColumns.Any();
 }
 using System;
 using @Model.ModelNamespace;
@@ -40,13 +41,16 @@ namespace @Model.TargetNamespace
         }
         }
 
-        private void PopulateSelectLists()
+        @if (hasForeignRelations)
         {
-            @foreach (var columnMetadata in @Model.ForeignKeyColumns)
-            {
-                var entityName = columnMetadata.ColumnName.Replace("Id", "");
-            @:ViewBag.@(entityName)List = @(entityName.ToPrivateVariableName("Repository")).FindAll().ToSelectItems(x => new SelectListItem { Value = x.@(entityName)Id.ToString(), Text = x.Value });
-            }
+            @:private void PopulateSelectLists()
+            @:{
+                foreach(var columnMetadata in @Model.ForeignKeyColumns)
+                {
+                    var entityName = columnMetadata.ColumnName.Replace("Id", "");
+                    @:ViewBag.@(entityName)List = @(entityName.ToPrivateVariableName("Repository")).FindAll().ToSelectItems(x => new SelectListItem { Value = x.@(entityName)Id.ToString(), Text = x.Value });
+                }
+            @:}
         }
 
         public ActionResult Index()
@@ -56,7 +60,10 @@ namespace @Model.TargetNamespace
 
         public ActionResult Create()
         {
-            PopulateSelectLists();
+            @if (hasForeignRelations)
+            {
+            @:PopulateSelectLists();
+            }
 
             return View();
         }
@@ -73,7 +80,10 @@ namespace @Model.TargetNamespace
             }
             catch (Exception ex)
             {
-                PopulateSelectLists();
+                @if (hasForeignRelations)
+                {
+                @:PopulateSelectLists();
+                }
                 ViewData["error"] = ex;
 
                 return View();
@@ -82,7 +92,10 @@ namespace @Model.TargetNamespace
 
         public ActionResult Edit(int id)
         {
-            PopulateSelectLists();
+            @if (hasForeignRelations)
+            {
+            @:PopulateSelectLists();
+            }
 
             return View(@(repositoryPrivateVariable).FindOne(id));
         }
@@ -99,7 +112,10 @@ namespace @Model.TargetNamespace
             }
             catch (Exception ex)
             {
-                PopulateSelectLists();
+                @if (hasForeignRelations)
+                {
+                @:PopulateSelectLists();
+                }
                 ViewData["error"] = ex;
 
                 return View(@(repositoryPrivateVariable).FindOne(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName)));

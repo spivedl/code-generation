@@ -38,11 +38,10 @@ namespace CodeGeneration.Services.Generation.Repository
 
             var options = context.ApplicationOptions.RepositoryGeneration;
             var connectionKey = context.ApplicationOptions.SourceConnectionKey;
-            var database = context.ApplicationOptions.SourceDatabase;
-            var schema = context.ApplicationOptions.SourceSchema;
-            var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
+            var targetDatabase = context.ApplicationOptions.TargetDatabase;
+            var targetSchema = context.ApplicationOptions.TargetSchema;
 
-            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(context.ApplicationOptions));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
@@ -70,7 +69,13 @@ namespace CodeGeneration.Services.Generation.Repository
                     {
                         Logger.Info("[CACHE MISS]: Repository code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
+                        var templateModel = new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata)
+                        {
+                            TargetDatabase = targetDatabase,
+                            TargetSchema = targetSchema
+                        };
+
+                        parsedContents = _razorTemplateService.Process(razorEngineKey, templateModel);
                         _cacheService.Set(cacheKey, parsedContents);
                     }
 

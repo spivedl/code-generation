@@ -39,12 +39,7 @@ namespace CodeGeneration.Services.Generation.Sql
             }
 
             var options = context.ApplicationOptions.SqlGeneration;
-            var connectionKey = context.ApplicationOptions.SourceConnectionKey;
-            var database = context.ApplicationOptions.SourceDatabase;
-            var schema = context.ApplicationOptions.SourceSchema;
-            var readOnlyColumns = context.ApplicationOptions.ReadOnlyProperties;
-
-            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(connectionKey, database, schema, readOnlyColumns));
+            var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(context.ApplicationOptions));
             var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
@@ -52,6 +47,8 @@ namespace CodeGeneration.Services.Generation.Sql
                 var outputPath = string.Empty;
                 var razorEngineKey = resource.ToRazorEngineKey();
                 var templateName = resource.ToTemplateName();
+
+                if (options.Output.GenerateOutput) DeleteOutputFile(options.Output, templateName);
 
                 foreach (var tableMetadata in tableMetadataSet)
                 {
@@ -84,6 +81,18 @@ namespace CodeGeneration.Services.Generation.Sql
 
                 if (!string.IsNullOrWhiteSpace(outputPath) && options.SqlCommand.ExecuteSql) _sqlCommandExecutor.ExecuteSqlCommand(outputPath, options.SqlCommand);
             }
+        }
+
+        private static void DeleteOutputFile(OutputOptions options, string templateName)
+        {
+            var basePath = options.Path;
+            var extension = options.Extension;
+            var fullPath = Path.ChangeExtension(Path.Combine(basePath, templateName), extension);
+
+            if (!System.IO.File.Exists(fullPath)) return;
+
+            Logger.Info("Deleting output file at '{0}'.", fullPath);
+            System.IO.File.Delete(fullPath);
         }
 
         private string WriteToFile(OutputOptions options, string templateName, string contents)

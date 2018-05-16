@@ -16,10 +16,7 @@ namespace @Model.TargetNamespace
     {
     @foreach (var column in @Model.TableMetadata.Columns)
     {
-        if (column.IsReadOnly){
-        @:[ReadOnly(true)]
-        }
-        @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited()))
+        @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited(" ")))
         @:@string.Format("public {0} {1} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.ColumnName)
     }
     }

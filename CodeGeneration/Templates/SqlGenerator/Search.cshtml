@@ -1,16 +1,17 @@
 ﻿@using System
-@using System.Linq
 @using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<TableMetadata>
+@{
+    var lines = 0;
+}
+RAISERROR('Creating stored procedure [@Model.TargetSchema].[sp_search_@Model.TableName.ToLowerDelimited()]', 10, 1)
 
-RAISERROR('Creating stored procedure [@Model.Schema].[sp_search_@Model.TableName]', 10, 1)
+USE [@Model.SourceDatabase]
 
-USE [@Model.Database]
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.Schema].[sp_search_@Model.TableName]') AND type in (N'P', N'PC'))
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[@Model.TargetSchema].[sp_search_@Model.TableName.ToLowerDelimited()]') AND type in (N'P', N'PC'))
 BEGIN
-DROP PROCEDURE [@Model.Schema].[sp_search_@Model.TableName]
+DROP PROCEDURE [@Model.TargetSchema].[sp_search_@Model.TableName.ToLowerDelimited()]
 END
 
 SET ANSI_NULLS ON
@@ -22,13 +23,12 @@ GO
 -- Version:		@RazorEngineExtensions.Version()
 -- Author:		@RazorEngineExtensions.Author()
 -- Create date: @DateTime.Now.ToString("f")
--- Description:	Auto-generated SEARCH stored procedure for table [@Model.Schema].[@Model.TableName].
+-- Description:	Auto-generated SEARCH stored procedure for table [@Model.TargetSchema].[@Model.TableName].
 -- =============================================
-CREATE PROCEDURE [@Model.Schema].[sp_search_@Model.TableName]
+CREATE PROCEDURE [@Model.TargetSchema].[sp_search_@Model.TableName.ToLowerDelimited()]
 @foreach (var column in @Model.Columns)
 {
-    @* This logic depends on the Columns being sorted by their OrdinalPostion *@
-    if (column.OrdinalPosition > 1)
+    if (lines > 0)
     {
     @:, @column.GetParameterString(true)
     }
@@ -36,16 +36,18 @@ CREATE PROCEDURE [@Model.Schema].[sp_search_@Model.TableName]
     {
     @:@column.GetParameterString(true)
     }
+
+    lines++;
 }
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
-
+@{ lines = 0; }
 @foreach (var column in @Model.Columns)
 {
-    if (column.OrdinalPosition > 1)
+    if (lines > 0)
     {
         @:, [@column.ColumnName]
     }
@@ -53,11 +55,14 @@ BEGIN
     {
     @:SELECT [@column.ColumnName]
     }
+
+    lines++;
 }
-    FROM [@Model.Schema].[@Model.TableName]
+    FROM [@Model.SourceSchema].[@Model.TableName]
+    @{ lines = 0; }
     @foreach (var column in @Model.Columns)
     {
-        if (column.OrdinalPosition > 1)
+        if (lines > 0)
         {
             if (column.MaxLength > 0)
             {
@@ -79,6 +84,8 @@ BEGIN
     @:WHERE (@@@column.ColumnName IS NULL OR [@column.ColumnName] = @@@column.ColumnName)
             }
         }
+
+        lines++;
     }
 
 END

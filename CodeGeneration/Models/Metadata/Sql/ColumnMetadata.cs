@@ -42,7 +42,7 @@ namespace CodeGeneration.Models.Metadata.Sql
             // handle length for nvarchar, varchar, nchar, char columns
             if (MaxLength >= 0)
             {
-                return $"{dataTypeUpper} ({MaxLength})";
+                return $"{dataTypeUpper}({MaxLength})";
             }
 
             // handle precision and scale for non-integer/non-money numeric columns
@@ -71,7 +71,7 @@ namespace CodeGeneration.Models.Metadata.Sql
                 return isForSearch ? " = NULL" : "";
             }
 
-            return $" = {ColumnDefault}";
+            return $" = {ColumnDefault.Replace("(","").Replace(")","")}";
         }
 
         public bool IsBooleanType()

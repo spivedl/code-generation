@@ -25,6 +25,11 @@ namespace CodeGeneration.Extensions
             return string.Concat(input.Select((ch, i) => (i > 0) && char.IsUpper(ch) ? delimiter + ch.ToString() : ch.ToString()));
         }
 
+        public static string ToLowerDelimited(this string input, string delimiter = "_")
+        {
+            return string.Concat(input.Select((ch, i) => (i > 0) && char.IsUpper(ch) ? delimiter + ch.ToString() : ch.ToString())).ToLowerInvariant();
+        }
+
         public static string ToFirstCharLowerCase(this string input)
         {
             return char.ToLowerInvariant(input[0]) + input.Substring(1);

@@ -8,6 +8,8 @@ namespace CodeGeneration.Models.Template
         public string SourceConnectionKey { get; set; }
         public string TargetNamespace { get; set; }
         public string ModelName => TableMetadata?.TableName.ToCamelCase();
+        public string TargetDatabase { get; set; }
+        public string TargetSchema { get; set; }
         public TableMetadata TableMetadata { get; set; }
 
         public TableMetadataTemplateModel()

@@ -14,6 +14,7 @@
         public string TargetConnectionKey { get; set; }
         public string TargetDatabase { get; set; }
         public string TargetSchema { get; set; }
+        public string[] IncludeTables { get; set; }
         public string[] ReadOnlyProperties { get; set; }
         public string[] RootTemplateDirectories { get; set; }
         public GenerationOptions ControllerGeneration { get; set; }
@@ -25,6 +26,10 @@
 
         public ApplicationOptions()
         {
+            IncludeTables = new string[] { };
+            ReadOnlyProperties = new string[] { };
+            RootTemplateDirectories = new string[] { };
+
             ControllerGeneration = new GenerationOptions();
             ModelGeneration = new GenerationOptions();
             RepositoryGeneration = new GenerationOptions();

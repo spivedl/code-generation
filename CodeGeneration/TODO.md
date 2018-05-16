@@ -2,6 +2,10 @@
 
 ## TODO
 
++ Add a better method to only run generation for certain tables.
+  + Right now, I'm using a IncludeTables variable and filtering the complete list of tables after the fact...probably a better way to do this.
++ Create `MetadataModel` classes for each generator type to make templates for controllers, repositories, etc. easier to write.
++ Add option to clean up existing files before a new run, otherwise you may have unexpected results because of appending...especially for SQL files.
 + Add an option for static templates (AKA ICrudRepository)
 + Rename the IBootService and BootService to something more appropriate.
 + Add hidden fields option for views.
@@ -36,4 +40,3 @@ so that it will lazy generate models if necessary, this will allow for each type
   + This should remove the need for a specific 'generator' for each type since the C# code for each generator is very similar.
   + This could also remove the need for compiling things in memory, since we should be able to use `TableMetadata` and `ColumnMetadata` to build template models.
   + Main difference between generator classes right now is the WriteToFile method, so probably need to create a `context` object to determine how a file is named, etc. Also, add to the interface.
-+ Create `MetadataModel` classes for each generator type to make templates for controllers, repositories, etc. easier to write.

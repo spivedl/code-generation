@@ -43,7 +43,7 @@
                     </thead>
                     <tbody>
                         @@if(Model.Any()){
-                        @@foreach(var @modelNameLower in Model){
+                        foreach(var @modelNameLower in Model){
                         <tr>
                             @foreach (var columnMetadata in Model.TableMetadata.Columns)
                             {
@@ -51,7 +51,7 @@
                                 <td>@@Html.DisplayFor(model => @(modelNameLower).@GetValueExpression(columnMetadata))</td>
                             }
                             <td>
-                                <a href="@Raw(GetUrlExpression("Edit", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-info">
+                                <a href="@Raw(GetUrlExpression("Edit", Model.ModelName, modelNameLower, primaryKeyName))" class="btn btn-sm btn-block btn-primary">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                             </td>
@@ -64,7 +64,7 @@
                         }
                         } else {
                         <tr>
-                            <td class="text-center" colspan="@Model.TableMetadata.Columns.Count + 2">
+                            <td class="text-center" colspan="@(Model.TableMetadata.Columns.Count + 2)">
                                 <strong>No records found...</strong>
                             </td>
                         </tr>

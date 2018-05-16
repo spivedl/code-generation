@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
 using CodeGeneration.Models.Metadata.Sql;
 using CodeGeneration.Services.Cache;
@@ -24,11 +25,10 @@ namespace CodeGeneration.Services.Data
 
         public ISet<TableMetadata> GetTableMetadata(TableMetadataContext context)
         {
-            var connectionKey = context.ConnectionKey;
-            var targetDatabase = context.TargetDatabase;
-            var targetSchema = context.TargetSchema;
-            var readOnlyColumns = context.ReadOnlyColumns;
-            var cacheKey = BuildCacheKey(targetDatabase, targetSchema);
+            var options = context.ApplicationOptions;
+            var sourceDatabase = options.SourceDatabase;
+            var sourceSchema = options.SourceSchema;
+            var cacheKey = BuildCacheKey(sourceDatabase, sourceSchema);
 
             Logger.Info($"Getting table metadata for {cacheKey}.");
 
@@ -42,8 +42,8 @@ namespace CodeGeneration.Services.Data
             {
                 Logger.Info($"[CACHE MISS] Table metadata for {cacheKey} NOT in cache. Will retrieve information from database and add to cache.");
 
-                var tableMetadataSet = InitializeTableMetadata(connectionKey, targetDatabase, targetSchema, readOnlyColumns);
-                tableMetadataSet = UpdateTableRelationships(connectionKey, targetDatabase, targetSchema, tableMetadataSet);
+                var tableMetadataSet = InitializeTableMetadata(context.ApplicationOptions);
+                tableMetadataSet = UpdateTableRelationships(context.ApplicationOptions, tableMetadataSet);
 
                 _cacheService.Set(cacheKey, tableMetadataSet);
 
@@ -51,14 +51,22 @@ namespace CodeGeneration.Services.Data
             }
             catch (Exception e)
             {
-                Logger.Error(e, $"Error attempting to retreive table metadata or relationships for '[{targetDatabase}].[{targetSchema}]'.");
+                Logger.Error(e, $"Error attempting to retreive table metadata or relationships for '{cacheKey}'.");
                 throw;
             }
         }
 
-        private ISet<TableMetadata> InitializeTableMetadata(string connectionKey, string targetDatabase, string targetSchema, string[] readOnlyColumns)
+        private ISet<TableMetadata> InitializeTableMetadata(ApplicationOptions options)
         {
-            Logger.Info($"Retrieving table metadata from database '{targetDatabase}' for schema '{targetSchema}'.");
+            var connectionKey = options.SourceConnectionKey;
+            var sourceDatabase = options.SourceDatabase;
+            var sourceSchema = options.SourceSchema;
+            var targetDatabase = options.TargetDatabase;
+            var targetSchema = options.TargetSchema;
+            var includeTables = options.IncludeTables;
+            var readOnlyColumns = options.ReadOnlyProperties;
+
+            Logger.Info($"Retrieving table metadata from database '{sourceDatabase}' for schema '{sourceSchema}'.");
 
             const string sql = @"
             SELECT  t.TABLE_CATALOG
@@ -100,14 +108,14 @@ namespace CodeGeneration.Services.Data
 	            ON t.TABLE_CATALOG = c.TABLE_CATALOG
 	            AND t.TABLE_SCHEMA = c.TABLE_SCHEMA
 	            AND t.TABLE_NAME = c.TABLE_NAME
-            WHERE t.TABLE_CATALOG = @targetDatabase
-	            AND t.TABLE_SCHEMA = @targetSchema
+            WHERE t.TABLE_CATALOG = @sourceDatabase
+	            AND t.TABLE_SCHEMA = @sourceSchema
             ORDER BY t.TABLE_NAME, c.ORDINAL_POSITION";
 
             var sqlParameters = new[]
             {
-                new SqlParameter("targetDatabase", targetDatabase),
-                new SqlParameter("targetSchema", targetSchema)
+                new SqlParameter("sourceDatabase", sourceDatabase),
+                new SqlParameter("sourceSchema", sourceSchema)
             };
 
             var tableDefinitions = new HashSet<TableMetadata>();
@@ -115,8 +123,11 @@ namespace CodeGeneration.Services.Data
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                var tableDatabase = row["TABLE_CATALOG"].ToString();
+                // check if includeTables variable has any entries, if it does then if it doesn't contain the current tables name then skip it
                 var tableName = row["TABLE_NAME"].ToString();
+                if (includeTables.Any() && !includeTables.Contains(tableName, StringComparer.OrdinalIgnoreCase)) continue;
+
+                var tableDatabase = row["TABLE_CATALOG"].ToString();
                 var tableSchema = row["TABLE_SCHEMA"].ToString();
                 var columnName = row["COLUMN_NAME"].ToString();
                 var ordinalPosition = (int)row["ORDINAL_POSITION"];
@@ -130,12 +141,12 @@ namespace CodeGeneration.Services.Data
                 var isForeignKey = row["IS_FOREIGN_KEY"].ToString().Equals("YES");
 
                 var tableDefinition = tableDefinitions.FirstOrDefault(td =>
-                    td.Database.Equals(tableDatabase)
-                    && td.Schema.Equals(tableSchema)
+                    td.SourceDatabase.Equals(tableDatabase)
+                    && td.SourceSchema.Equals(tableSchema)
                     && td.TableName.Equals(tableName));
 
                 var alreadyInSet = tableDefinition != null;
-                if (!alreadyInSet) tableDefinition = new TableMetadata(tableDatabase, tableSchema, tableName);
+                if (!alreadyInSet) tableDefinition = new TableMetadata(tableDatabase, tableSchema, targetDatabase, targetSchema, tableName);
 
                 var columnDefinition = tableDefinition.Columns.FirstOrDefault(tc => tc.ColumnName.Equals(columnName));
                 if (columnDefinition != null) continue;
@@ -166,9 +177,13 @@ namespace CodeGeneration.Services.Data
             return tableDefinitions;
         }
 
-        private ISet<TableMetadata> UpdateTableRelationships(string connectionKey, string targetDatabase, string targetSchema, ISet<TableMetadata> tableDefinitions)
+        private ISet<TableMetadata> UpdateTableRelationships(ApplicationOptions options, ISet<TableMetadata> tableDefinitions)
         {
-            Logger.Info($"Retrieving relationship metadata from database '{targetDatabase}' for schema '{targetSchema}'.");
+            var connectionKey = options.SourceConnectionKey;
+            var sourceDatabase = options.SourceDatabase;
+            var sourceSchema = options.SourceSchema;
+
+            Logger.Info($"Retrieving relationship metadata from database '{sourceDatabase}' for schema '{sourceSchema}'.");
 
             const string sql = @"
             SELECT  ccu.TABLE_CATALOG
@@ -183,13 +198,13 @@ namespace CodeGeneration.Services.Data
                 ON ccu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME 
             INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu 
                 ON kcu.CONSTRAINT_NAME = rc.UNIQUE_CONSTRAINT_NAME
-            WHERE ccu.TABLE_CATALOG = @targetDatabase AND ccu.TABLE_SCHEMA = @targetSchema
+            WHERE ccu.TABLE_CATALOG = @sourceDatabase AND ccu.TABLE_SCHEMA = @sourceSchema
             ORDER BY ccu.table_name";
 
             var sqlParameters = new[]
             {
-                new SqlParameter("targetDatabase", targetDatabase),
-                new SqlParameter("targetSchema", targetSchema)
+                new SqlParameter("sourceDatabase", sourceDatabase),
+                new SqlParameter("sourceSchema", sourceSchema)
             };
 
             var dataSet = _dataService.QueryForDataSet(connectionKey, sql, sqlParameters, logResults: true);
@@ -205,13 +220,13 @@ namespace CodeGeneration.Services.Data
                 var targetColumnName = row["TARGET_COLUMN_NAME"].ToString();
 
                 var sourceTableDefinition = tableDefinitions.FirstOrDefault(td =>
-                    td.Database.Equals(tableDatabase)
-                    && td.Schema.Equals(tableSchema)
+                    td.SourceDatabase.Equals(tableDatabase)
+                    && td.SourceSchema.Equals(tableSchema)
                     && td.TableName.Equals(sourceTableName));
 
                 var targetTableDefinition = tableDefinitions.FirstOrDefault(td =>
-                    td.Database.Equals(tableDatabase)
-                    && td.Schema.Equals(tableSchema)
+                    td.SourceDatabase.Equals(tableDatabase)
+                    && td.SourceSchema.Equals(tableSchema)
                     && td.TableName.Equals(targetTableName));
 
                 if (sourceTableDefinition is null || targetTableDefinition is null) continue;
@@ -242,9 +257,9 @@ namespace CodeGeneration.Services.Data
             return tableDefinitions;
         }
 
-        private static string BuildCacheKey(string targetDatabase, string targetSchema)
+        private static string BuildCacheKey(string sourceDatabase, string sourceSchema)
         {
-            return $"[{targetDatabase}].[{targetSchema}]";
+            return $"[{sourceDatabase}].[{sourceSchema}]";
         }
     }
 }
