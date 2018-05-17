@@ -31,12 +31,12 @@
         <div class="card-footer">
             <div class="row sm-gutters">
                 <div class="col-2">
-                    <button type="submit" class="btn btn-block btn-lg btn-danger">
-                        <i class="fas fa-trash-alt"></i> Delete @Model.ModelName
+                    <button type="submit" class="btn btn-block btn-danger">
+                        <i class="fas fa-trash-alt"></i> Delete @Model.ModelName.ToUpperDelimited()
                     </button>
                 </div>
                 <div class="col-2">
-                    <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-lg btn-secondary">
+                    <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-secondary">
                         Cancel
                     </a>
                 </div>

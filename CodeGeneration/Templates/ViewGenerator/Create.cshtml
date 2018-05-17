@@ -61,8 +61,8 @@
                                        data-datepicker="true"
                                        data-date-format="%Y-%m-%d %T"
                                        data-val="true"
-                                       data-val-date="The field @propertyAccessor must be a date."
-                                       data-val-required="The @propertyAccessor field is required.">
+                                       data-val-date="The field @propertyAccessor.ToUpperDelimited() must be a date."
+                                       data-val-required="The @propertyAccessor.ToUpperDelimited() field is required.">
                                 <div class="input-group-append">
                                     <span class="input-group-text btn btn-dark" data-date-now="@propertyAccessor">
                                         <i class="fas fa-clock" aria-hidden="true"></i>
@@ -89,7 +89,7 @@
                             }
                             else
                             {
-                            <input id="@propertyAccessor" name="@propertyAccessor" class="form-control" type="text" data-val="true" data-val-required="The @propertyAccessor field is required."/>
+                            <input id="@propertyAccessor" name="@propertyAccessor" class="form-control" type="text" data-val="true" data-val-required="The @propertyAccessor.ToUpperDelimited() field is required."/>
                             @:@@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
                             }
                         </div>
@@ -100,12 +100,12 @@
         <div class="card-footer">
             <div class="row sm-gutters">
                 <div class="col-2">
-                    <button type="submit" class="btn btn-block btn-lg btn-success">
+                    <button type="submit" class="btn btn-block btn-success">
                         <i class="fas fa-save"></i> Save
                     </button>
                 </div>
                 <div class="col-2">
-                    <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-lg btn-secondary">
+                    <a href="@Raw(GetUrlExpression("Index", @Model.ModelName))" class="btn btn-block btn-secondary">
                         Cancel
                     </a>
                 </div>

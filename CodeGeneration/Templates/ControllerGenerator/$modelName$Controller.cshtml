@@ -118,9 +118,18 @@ namespace @Model.TargetNamespace
         {
             try
             {
+                @if (Model.Columns.Any(c => c.ColumnName.Equals("LastUpdateUser", StringComparison.OrdinalIgnoreCase)))
+                {
+                @:@(modelParamName).LastUpdateUser = User.Identity.GetUserName();
+                }
+                @if (Model.Columns.Any(c => c.ColumnName.Equals("LastUpdate", StringComparison.OrdinalIgnoreCase)))
+                {
+                @:@(modelParamName).LastUpdate = DateTime.Now;
+                }
+
                 @(repositoryPrivateVariable).Create(@modelParamName);
     
-                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' created successfully!";
+                TempData["message"] = $"@Model.ModelName.ToUpperDelimited() '{@(modelParamName).@(primaryKeyName)}' created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -140,7 +149,6 @@ namespace @Model.TargetNamespace
             {
             @:PopulateSelectLists();
             }
-    
             try 
             {
                 return View(@(repositoryPrivateVariable).FindOne(id));
@@ -158,9 +166,18 @@ namespace @Model.TargetNamespace
         {
             try
             {
+                @if (Model.Columns.Any(c => c.ColumnName.Equals("LastUpdateUser", StringComparison.OrdinalIgnoreCase)))
+                {
+                @:@(modelParamName).LastUpdateUser = User.Identity.GetUserName();
+                }
+                @if (Model.Columns.Any(c => c.ColumnName.Equals("LastUpdate", StringComparison.OrdinalIgnoreCase)))
+                {
+                @:@(modelParamName).LastUpdate = DateTime.Now;
+                }
+
                 @(repositoryPrivateVariable).Edit(@modelParamName);
     
-                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' edited successfully!";
+                TempData["message"] = $"@Model.ModelName.ToUpperDelimited() '{@(modelParamName).@(primaryKeyName)}' edited successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -195,7 +212,7 @@ namespace @Model.TargetNamespace
             {
                 @(repositoryPrivateVariable).Delete(@(modelParamName).@(Model.PrimaryKeyColumn.ColumnName));
     
-                TempData["message"] = $"@Model.ModelName '{@(modelParamName).@(primaryKeyName)}' deleted successfully!";
+                TempData["message"] = $"@Model.ModelName.ToUpperDelimited() '{@(modelParamName).@(primaryKeyName)}' deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

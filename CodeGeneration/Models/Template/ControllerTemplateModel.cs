@@ -19,6 +19,7 @@ namespace CodeGeneration.Models.Template
         public string ConstructorParameters { get; set; }
         public ColumnMetadata PrimaryKeyColumn { get; set; }
         public IEnumerable<ColumnMetadata> ForeignKeyColumns { get; set; }
+        public IEnumerable<ColumnMetadata> Columns { get; set; }
 
         public ControllerTemplateModel(string targetNamespace, TableMetadata tableMetadata)
         {
@@ -32,6 +33,7 @@ namespace CodeGeneration.Models.Template
             ClassName = $"{ModelName}Controller";
             PrimaryKeyColumn = tableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
             ForeignKeyColumns = tableMetadata.Columns.Where(c => c.IsForeignKey);
+            Columns = tableMetadata.Columns;
 
             var primaryRepositoryCtor = $"{ModelName.ToInterfaceName("Repository")} {ModelName.ToVariableName("Repository")}";
             var foreignRepositoryCtor = string.Join(", ",
