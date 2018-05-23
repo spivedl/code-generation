@@ -9,7 +9,7 @@
 @@using (Html.BeginForm("Create", "@Model.ModelName", FormMethod.Post, new { role = "form" }))
 {
     <div class="card shadow">
-        @@Html.Partial("_FormNavigationPartial")
+        @@Html.Partial("_MenuNavigationPartial")
         <div class="card-body">
             @@Html.AntiForgeryToken()
             @@Html.Partial("_ValidationSummary", ViewData.ModelState)
@@ -21,6 +21,8 @@
                 if (columnMetadata.IsForeignKey)
                 {
                     var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
+                    var itemValue = "@item.Value";
+                    var itemText = "@item.Text";
                     <div class="form-row">
                         <div class="form-group col">
                             <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
@@ -29,9 +31,9 @@
                                     data-select="true"
                                     data-select-allow-clear="true">
                                 @@foreach(var item in @itemSourceName)
-                                {{
-                                    <option value="item.Value">item.Text</option>
-                                }}
+                                {
+                                    <option value="@itemValue">@itemText</option>
+                                }
                             </select>
                             @@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
                         </div>
@@ -54,7 +56,7 @@
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
-                                        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                        <i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i>
                                     </span>
                                 </div>
                                 <input id="@propertyAccessor" name="@propertyAccessor" type="datetime" class="form-control"
@@ -65,12 +67,12 @@
                                        data-val-required="The @propertyAccessor.ToUpperDelimited() field is required.">
                                 <div class="input-group-append">
                                     <span class="input-group-text btn btn-dark" data-date-now="@propertyAccessor">
-                                        <i class="fas fa-clock" aria-hidden="true"></i>
+                                        <i class="fas fa-fw fa-clock" aria-hidden="true"></i>
                                     </span>
                                 </div>
                                 <div class="input-group-append">
                                     <span class="input-group-text btn btn-dark" data-date-reset="@propertyAccessor">
-                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                        <i class="fas fa-fw fa-times" aria-hidden="true"></i>
                                     </span>
                                 </div>
                             </div>
@@ -101,7 +103,7 @@
             <div class="row sm-gutters">
                 <div class="col-2">
                     <button type="submit" class="btn btn-block btn-success">
-                        <i class="fas fa-save"></i> Save
+                        <i class="fas fa-fw fa-save"></i> Save
                     </button>
                 </div>
                 <div class="col-2">

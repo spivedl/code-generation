@@ -9,7 +9,7 @@
     Layout = null;
     var paginationInstanceId = @@ViewBag.InstanceId ?? "pagination";
 }
-<table class="table table-bordered table-sm table-sortable mb-0" data-instance-id="@@paginationInstanceId" data-role="table">
+<table class="table table-bordered table-sm mb-0" data-instance-id="@@paginationInstanceId" data-role="table">
     <thead class="thead-light">
         <tr>
             @foreach (var columnMetadata in Model.TableMetadata.Columns)
@@ -36,12 +36,12 @@
             }
             <td>
                 <a href="@Raw(GetUrlExpression("Edit", @Model.ModelName, primaryKey.ColumnName))" target="_blank" class="btn btn-sm btn-block btn-primary">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="fas fa-fw fa-edit"></i> Edit
                 </a>
             </td>
             <td>
                 <a href="@Raw(GetUrlExpression("Delete", @Model.ModelName, primaryKey.ColumnName))" target="_blank" class="btn btn-sm btn-block btn-danger">
-                    <i class="fas fa-trash-alt"></i> Delete
+                    <i class="fas fa-fw fa-trash-alt"></i> Delete
                 </a>
             </td>
         </tr>

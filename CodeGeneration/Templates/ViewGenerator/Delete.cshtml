@@ -12,7 +12,7 @@
 @@using (Html.BeginForm("Delete", "@Model.ModelName", FormMethod.Post, new { role = "form" }))
 {
     <div class="card shadow">
-        @@Html.Partial("_FormNavigationPartial")
+        @@Html.Partial("_MenuNavigationPartial")
         <div class="card-body">
             @@Html.AntiForgeryToken()
             @@Html.HiddenFor(model => model.@Raw(GetValueExpression(primaryKey)))
@@ -32,7 +32,7 @@
             <div class="row sm-gutters">
                 <div class="col-2">
                     <button type="submit" class="btn btn-block btn-danger">
-                        <i class="fas fa-trash-alt"></i> Delete @Model.ModelName.ToUpperDelimited()
+                        <i class="fas fa-fw fa-trash-alt"></i> Delete @Model.ModelName.ToUpperDelimited()
                     </button>
                 </div>
                 <div class="col-2">
