@@ -42,9 +42,13 @@
                 else if (columnMetadata.IsBooleanType())
                 {
                     <div class="form-row">
-                        <div class="form-check col">
-                            <input id="@propertyAccessor" name="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
-                            <label for="@propertyAccessor" class="form-check-label"></label>
+                        <div class="form-group col">
+                            <div class="form-check checkbox">
+                                <input class="form-check-input" type="checkbox" id="@propertyAccessor" name="@propertyAccessor">
+                                <label class="form-check-label" for="@propertyAccessor">
+                                    @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
+                                </label>
+                            </div>
                         </div>
                     </div>
                 }

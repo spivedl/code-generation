@@ -25,6 +25,9 @@
             if (columnMetadata.IsForeignKey)
             {
                 var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
+                var itemValue = "@item.Value";
+                var itemText = "@item.Text";
+                var selectedCheck = string.Format("@(Model.{0}.Equals(item.Value) ? \"selected\" : \"\"", columnMetadata.ColumnName);
                 <div class="form-row">
                     <div class="form-group col">
                         <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
@@ -33,9 +36,9 @@
                                 data-select="true"
                                 data-select-allow-clear="true">
                             @@foreach(var item in @itemSourceName)
-                            {{
-                                <option value="item.Value">item.Text</option>
-                            }}
+                            {
+                                <option value="@itemValue" @Raw(selectedCheck)>@itemText</option>
+                            }
                         </select>
                         @@Html.ValidationMessageFor(model => model.@(GetValueExpression(columnMetadata)), "", new { @@class = "text-danger" })
                     </div>
@@ -44,9 +47,13 @@
             else if (columnMetadata.IsBooleanType())
             {
                 <div class="form-row">
-                    <div class="form-check col">
-                        <input id="@propertyAccessor" name="@propertyAccessor" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
-                        <label for="@propertyAccessor" class="form-check-label"></label>
+                    <div class="form-group col">
+                        <div class="form-check checkbox">
+                            <input class="form-check-input" type="checkbox" id="@propertyAccessor" name="@propertyAccessor" checked="checked">
+                            <label class="form-check-label" for="@propertyAccessor">
+                                @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
+                            </label>
+                        </div>
                     </div>
                 </div>
             }
