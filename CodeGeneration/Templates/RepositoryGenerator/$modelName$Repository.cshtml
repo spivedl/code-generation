@@ -302,16 +302,29 @@ namespace Domain.Repositories.Dapper
         var primaryKeyColumn = model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
         var primaryKeyColumnName = primaryKeyColumn != null ? primaryKeyColumn.ColumnName : string.Format("{0}Id", model.TableMetadata.TableName);
         var fqTableName = string.Format("[{0}].[{1}].[{2}]", model.TableMetadata.SourceDatabase, model.TableMetadata.SourceSchema, model.TableMetadata.TableName);
+        var firstLine = true;
 
         #region FILTER SQL
 
-        sbSql.Append("\n;WITH _filter AS\n(\n")
-            .AppendFormat("\tSELECT [{0}]\n", primaryKeyColumnName)
-            .AppendFormat("\tFROM {0} \n", fqTableName);
+        sbSql.Append("\n;WITH _filter AS\n(\n");
+
+        foreach(var columnMetadata in model.TableMetadata.Columns)
+        {
+            if (firstLine)
+            {
+                sbSql.AppendFormat("\tSELECT [{0}]\n", columnMetadata.ColumnName);
+                firstLine = false;
+            }
+            else
+            {
+                sbSql.AppendFormat("\t\t, [{0}]\n", columnMetadata.ColumnName);
+            }
+        }
+        sbSql.AppendFormat("\tFROM {0} \n", fqTableName);
 
         if (includeSearchSql)
         {
-            var firstLine = true;
+            firstLine = true;
             foreach (var columnMetadata in model.TableMetadata.Columns)
             {
                 if (columnMetadata.IsPrimaryKey) continue;
@@ -344,33 +357,19 @@ namespace Domain.Repositories.Dapper
 
         #endregion
 
-        #region PAGE SQL
-        sbSql
-            .Append(")\n, _page AS\n(\n")
-            .AppendFormat("\tSELECT [{0}]\n", primaryKeyColumnName)
-            .AppendFormat("\tFROM {0} x\n", fqTableName);
+        #region SELECT/PAGE SQL
 
-        if (includeSearchSql) sbSql.AppendFormat("\tWHERE EXISTS (SELECT 1 FROM _filter WHERE _filter.[{0}] = x.[{0}])\n", primaryKeyColumnName);
-
-        sbSql
-            .Append("\tORDER BY @SortExpression @SortDirection\n")
-            .Append("\tOFFSET @PageSize * (@PageNumber - 1) ROWS\n")
-            .Append("\tFETCH NEXT @PageSize ROWS ONLY\n")
-            .Append(")\n");
-
-        #endregion
-
-        #region SELECT SQL
-
-        sbSql.AppendFormat("SELECT (SELECT COUNT([{0}]) FROM _filter) AS [TotalItems]\n", primaryKeyColumnName);
+        sbSql.Append(")\n");
+        sbSql.Append("SELECT (SELECT COUNT(*) FROM _filter) AS [TotalItems]\n");
         foreach (var columnMetadata in model.TableMetadata.Columns)
         {
             sbSql.AppendFormat("\t, [{0}]\n", columnMetadata.ColumnName);
         }
         sbSql
-            .AppendFormat("FROM {0} x\n", fqTableName)
-            .AppendFormat("WHERE EXISTS (SELECT 1 FROM _page WHERE _page.[{0}] = x.[{0}])\n", primaryKeyColumnName)
-            .Append("ORDER BY @SortExpression @SortDirection;"); 
+            .Append("FROM _filter\n")
+            .Append("ORDER BY @SortExpression @SortDirection\n")
+            .Append("OFFSET @PageSize * (@PageNumber - 1) ROWS\n")
+            .Append("FETCH NEXT @PageSize ROWS ONLY;");
         #endregion
 
         return sbSql.ToString();
