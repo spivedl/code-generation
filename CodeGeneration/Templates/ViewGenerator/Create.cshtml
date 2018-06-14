@@ -1,7 +1,7 @@
 ﻿@using CodeGeneration.Extensions
 @using CodeGeneration.Models.Metadata.Sql
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
-@@model @(Model.TargetNamespace).@(Model.ModelName)
+@@model @(Model.TargetNamespace).Domain.@(Model.ModelName)
 @@{
     ViewData["Title"] = "Create @Model.ModelName.ToUpperDelimited()";
 }
@@ -23,13 +23,11 @@
                     var itemSourceName = string.Format("ViewBag.{0}", columnMetadata.ColumnName.Replace("Id", "List"));
                     var itemValue = "@item.Value";
                     var itemText = "@item.Text";
+                    var label = @propertyAccessor.ToUpperDelimited().Replace("Id", "");
                     <div class="form-row">
                         <div class="form-group col">
-                            <label for="@propertyAccessor">@@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))</label>
-                            <select id="@propertyAccessor" name="@propertyAccessor" class="form-control"
-                                    placeholder="Select a @propertyAccessor.ToUpperDelimited()..."
-                                    data-select="true"
-                                    data-select-allow-clear="true">
+                            <label for="@propertyAccessor">@label</label>
+                            <select id="@propertyAccessor" name="@propertyAccessor" class="form-control" placeholder="Select a @label..." data-select="true">
                                 @@foreach(var item in @itemSourceName)
                                 {
                                     <option value="@itemValue">@itemText</option>
@@ -44,7 +42,7 @@
                     <div class="form-row">
                         <div class="form-group col">
                             <div class="form-check checkbox">
-                                <input class="form-check-input" type="checkbox" id="@propertyAccessor" name="@propertyAccessor">
+                                <input class="form-check-input" type="checkbox" id="@propertyAccessor" name="@propertyAccessor" value="true">
                                 <label class="form-check-label" for="@propertyAccessor">
                                     @@Html.DisplayNameFor(model => model.@GetValueExpression(columnMetadata))
                                 </label>

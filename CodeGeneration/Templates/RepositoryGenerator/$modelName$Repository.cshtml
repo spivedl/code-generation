@@ -14,14 +14,14 @@
 }
 using System.Collections.Generic;
 using System.Data;
+using ControlPanel.Infrastructure.Extensions;
+using ControlPanel.Infrastructure.Repositories.Interfaces;
+using ControlPanel.Infrastructure.Services.Data;
+using ControlPanel.Models.Domain;
+using ControlPanel.Models.Pagination;
 using Dapper;
-using Domain.Extensions;
-using Domain.Models;
-using Domain.Models.Pagination;
-using Domain.Repositories.Interfaces;
-using Domain.Services.Data;
 
-namespace Domain.Repositories.Dapper
+namespace @(Model.TargetNamespace).Dapper
 {
     /// <inheritdoc />
     /// <summary>
@@ -34,7 +34,7 @@ namespace Domain.Repositories.Dapper
     {
         private readonly IDataService _dataService;
 
-        private IDbConnection Connection => _dataService.GetConnection("@Model.SourceConnectionKey");
+        private IDbConnection Connection => _dataService.GetConnection();
 
         public @(Model.ModelName)Repository(IDataService dataService)
         {
@@ -92,9 +92,9 @@ namespace Domain.Repositories.Dapper
         public int Delete(int @primaryKeyNameLower)
         {
             const string sql = @@"
-            DELETE 
-            FROM [@Model.TableMetadata.SourceDatabase].[@Model.TableMetadata.SourceSchema].[@Model.TableMetadata.TableName]
-            WHERE [@primaryKeyName] = @@@primaryKeyName;";
+DELETE 
+FROM [@Model.TableMetadata.SourceDatabase].[@Model.TableMetadata.SourceSchema].[@Model.TableMetadata.TableName]
+WHERE [@primaryKeyName] = @@@primaryKeyName;";
 
             using (var connection = Connection)
             {

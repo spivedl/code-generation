@@ -2,10 +2,9 @@
 @using CodeGeneration.Extensions
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.StaticFileTemplateModel>
 using System.Collections.Generic;
-using Domain.Models;
-using Domain.Models.Pagination;
+using ControlPanel.Models.Pagination;
 
-namespace @(Model.TargetNamespace).Repositories.Interfaces
+namespace @(Model.TargetNamespace).Interfaces
 {
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()

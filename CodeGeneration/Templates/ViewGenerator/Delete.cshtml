@@ -4,7 +4,7 @@
 @{
     var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
 }
-@@model @(Model.TargetNamespace).@(Model.ModelName)
+@@model @(Model.TargetNamespace).Domain.@(Model.ModelName)
 @@{
     ViewData["Title"] = "Delete @Model.ModelName.ToUpperDelimited()";
 }

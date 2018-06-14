@@ -4,7 +4,7 @@
     var primaryKey = Model.TableMetadata.Columns.FirstOrDefault(c => c.IsPrimaryKey);
 }
 @@using ControlPanel.Infrastructure.Extensions
-@@model Domain.Models.Pagination.PagableViewModel<Domain.Models.@Model.ModelName>
+@@model @(Model.TargetNamespace).Pagination.PagableViewModel<@(Model.TargetNamespace).Domain.@(Model.ModelName)>
 @@{
     Layout = null;
     var paginationInstanceId = @@ViewBag.InstanceId ?? "pagination";

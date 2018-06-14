@@ -11,10 +11,14 @@
 using System;
 using System.Web.Mvc;
 using ControlPanel.Infrastructure.Extensions;
+using ControlPanel.Infrastructure.Repositories.Interfaces;
+using ControlPanel.Models.Domain;
+using ControlPanel.Models.Pagination;
 using ControlPanel.Models.View;
-using Domain.Repositories.Interfaces;
-using Domain.Models;
-using Domain.Models.Pagination;
+@if (Model.Columns.Any(c => c.ColumnName.Equals("LastUpdateUser", StringComparison.OrdinalIgnoreCase)))
+{
+@:using Microsoft.AspNet.Identity;
+}
 
 namespace @Model.TargetNamespace
 {
@@ -156,7 +160,7 @@ namespace @Model.TargetNamespace
             catch (Exception ex)
             {
                 TempData["error"] = ex;
-                return RedirectToAction("Error","Security");
+                return RedirectToAction("Index","Error");
             }
         }
 
@@ -200,7 +204,7 @@ namespace @Model.TargetNamespace
             catch (Exception ex)
             {
                 TempData["error"] = ex;
-                return RedirectToAction("Error","Security");
+                return RedirectToAction("Index","Error");
             }
         }
 

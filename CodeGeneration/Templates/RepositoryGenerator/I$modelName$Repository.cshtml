@@ -1,12 +1,9 @@
 ﻿@using System
 @using CodeGeneration.Extensions
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
-@{
-    var rootNamespace = Model.TargetNamespace.Substring(0, Model.TargetNamespace.IndexOf('.'));
-}
-using @(rootNamespace).Models;
+using ControlPanel.Models.Domain;
 
-namespace @(rootNamespace).Repositories.Interfaces
+namespace @(Model.TargetNamespace).Interfaces
 {
     /// <inheritdoc />
     /// <summary>

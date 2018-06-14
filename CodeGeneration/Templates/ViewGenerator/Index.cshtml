@@ -47,7 +47,7 @@
 {
     string GetEnumerableTypeExpression(string ns, string modelName)
     {
-        return string.Format("IEnumerable<{0}.{1}>", ns, modelName);
+        return string.Format("IEnumerable<{0}.Domain.{1}>", ns, modelName);
     }
 
     static string GetValueExpression(ColumnMetadata columnMetadata)

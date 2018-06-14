@@ -3,7 +3,7 @@
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 using System;
 using System.ComponentModel;
-using Domain.Models.Pagination;
+using ControlPanel.Models.Pagination;
 
 namespace @Model.TargetNamespace
 {
@@ -18,7 +18,7 @@ namespace @Model.TargetNamespace
     @foreach (var column in @Model.TableMetadata.Columns)
     {
         @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited(" ")))
-        @:@string.Format("public {0}{1} {2} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), column.IsNullable ? "?" : "", column.ColumnName)
+        @:@string.Format("public {0}{1} {2} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), SqlDataTypeConverter.IsNullableType(column) ? "?" : "", column.ColumnName)
     }
     }
 }
