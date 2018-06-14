@@ -1,4 +1,5 @@
 ﻿using System;
+using CodeGeneration.Models.Metadata.Sql;
 
 namespace CodeGeneration.Extensions
 {
@@ -96,6 +97,13 @@ namespace CodeGeneration.Extensions
                 default:
                     return "string";
             }
+        }
+
+        public static bool IsNullableType(ColumnMetadata columnMetadata)
+        {
+            var netType = GetTypeAsString(columnMetadata.DataType);
+
+            return columnMetadata.IsNullable && !("string".Equals(netType));
         }
     }
 }
