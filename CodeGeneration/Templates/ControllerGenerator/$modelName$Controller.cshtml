@@ -65,9 +65,7 @@ namespace @Model.TargetNamespace
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Index(Pagination pagination)
+        public ActionResult Page(Pagination pagination)
         {
             // setting ViewBag.InstanceId is only necessary if a page has multiple instances of pagination
             // that need to operate independently from each other
@@ -83,6 +81,7 @@ namespace @Model.TargetNamespace
                 {
                     Data = new JsonResultDataModel
                     {
+                        JsonRequestBehavior = JsonRequestBehavior.AllowGet,
                         json = new
                         {
                             tableHtml,

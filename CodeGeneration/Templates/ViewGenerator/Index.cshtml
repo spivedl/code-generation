@@ -26,15 +26,10 @@
     </div>
 </div>
 
-@@Html.AntiForgeryToken()
 @@section scripts {
 <script type="text/javascript">
         var pagination = new Pagination({
-            antiForgeryToken: {
-                identifier: "__RequestVerificationToken",
-                value: $("input[name=__RequestVerificationToken]").val()
-            },
-            postUrl: "@Raw(GetUrlExpression("Index", @Model.ModelName))",
+            url: "@Raw(GetUrlExpression("Page", @Model.ModelName))",
             sortExpression: "@primaryKeyName",
             sortDirection: "asc"
         });
