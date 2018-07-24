@@ -1,6 +1,8 @@
-﻿namespace CodeGeneration.Models.Metadata.Sql
+﻿using DotLiquid;
+
+namespace CodeGeneration.Models.Metadata.Sql
 {
-    public class RelationshipMetadata
+    public class RelationshipMetadata : Drop
     {
         public string ConstraintName { get; set; }
         public string SourceTableName { get; set; }

@@ -7,7 +7,7 @@ using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
-using CodeGeneration.Services.Template.Razor;
+using CodeGeneration.Services.Template;
 using NLog;
 
 namespace CodeGeneration.Services.Generation.Model
@@ -16,14 +16,14 @@ namespace CodeGeneration.Services.Generation.Model
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITableMetadataService _tableMetadataService;
-        private readonly IRazorTemplateService _razorTemplateService;
+        private readonly ITemplateService _templateService;
         private readonly ICacheService _cacheService;
         private readonly IFileWriter _fileWriter;
 
-        public ModelGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter) 
+        public ModelGeneratorService(ITableMetadataService tableMetadataService, ITemplateService templateService, ICacheService cacheService, IFileWriter fileWriter) 
         {
             _tableMetadataService = tableMetadataService;
-            _razorTemplateService = razorTemplateService;
+            _templateService = templateService;
             _cacheService = cacheService;
             _fileWriter = fileWriter;
         }
@@ -40,21 +40,18 @@ namespace CodeGeneration.Services.Generation.Model
             var connectionKey = context.ApplicationOptions.SourceConnectionKey;
 
             var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(context.ApplicationOptions));
-            var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
+            var embeddedResources = _templateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
-            {
-                var razorEngineKey = resource.ToRazorEngineKey();
-                var templateName = resource.ToTemplateName();
-
+            {               
                 foreach (var tableMetadata in tableMetadataSet)
                 {
                     var modelName = tableMetadata.TableName.ToCamelCase();
   
                     Logger.Info("Model Name: {0}", modelName);
                     Logger.Info("Embedded resource: {0}", resource);
-                    Logger.Info("Razor Engine Key: {0}", razorEngineKey);
-                    Logger.Info("Template Name: {0}", templateName);
+                    Logger.Info("Razor Engine Key: {0}", resource);
+                    Logger.Info("Template Name: {0}", resource);
 
                     string parsedContents;
                     if (_cacheService.Exists(modelName))
@@ -66,11 +63,11 @@ namespace CodeGeneration.Services.Generation.Model
                     {
                         Logger.Info("[CACHE MISS]: Model code for {0} NOT found in cache. Will process template and add to cache.", modelName);
 
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
+                        parsedContents = _templateService.Process(resource, new TableMetadataTemplateModel(connectionKey, options.Namespace, tableMetadata));
                         _cacheService.Set(modelName, parsedContents);
                     }
 
-                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, templateName, parsedContents);
+                    if (options.Output.GenerateOutput) WriteToFile(options.Output, modelName, resource, parsedContents);
                 }
             }
         }
@@ -98,7 +95,7 @@ namespace CodeGeneration.Services.Generation.Model
 
         public string GetTemplate(string templateName, string templateDirectory = "")
         {
-            return _razorTemplateService.ResolveTemplate(templateName.ToRazorEngineKey(templateDirectory));
+            return _templateService.ResolveTemplate(templateName.ToRazorEngineKey(templateDirectory));
         }
     }
 }

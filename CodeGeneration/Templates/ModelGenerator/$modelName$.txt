@@ -1,0 +1,18 @@
+﻿using System;
+using {{TargetNamespace}}.Pagination;
+
+namespace {{TargetNamespace}}.Domain
+{
+    /// <summary>
+    /// Author: @RazorEngineExtensions.Author()
+    /// Version: @RazorEngineExtensions.Version()
+    /// Create Date: @DateTime.Now.ToString("f")
+    /// Description: Auto-generated model for the @Model.TableMetadata.TableName table.
+    /// </summary>
+    public class {{ModelName}} : PagableModel
+    {
+	{% for column in TableMetadata.Columns -%}
+		public {{column.data_type}} {{column.column_name}} { get; set; }
+	{% endfor -%}
+    }
+}

@@ -1,8 +1,9 @@
 ﻿using CodeGeneration.Extensions;
+using DotLiquid;
 
 namespace CodeGeneration.Models.Metadata.Sql
 {
-    public class ColumnMetadata
+    public class ColumnMetadata : Drop
     {
         public string Database { get; set; }
         public string Schema { get; set; }

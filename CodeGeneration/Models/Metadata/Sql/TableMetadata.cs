@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using DotLiquid;
 
 namespace CodeGeneration.Models.Metadata.Sql
 {
-    public class TableMetadata
+    public class TableMetadata : Drop
     {
         public string SourceDatabase { get; set; }
         public string SourceSchema { get; set; }

@@ -7,7 +7,7 @@ using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
-using CodeGeneration.Services.Template.Razor;
+using CodeGeneration.Services.Template;
 using NLog;
 
 namespace CodeGeneration.Services.Generation.Controller
@@ -16,14 +16,14 @@ namespace CodeGeneration.Services.Generation.Controller
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITableMetadataService _tableMetadataService;
-        private readonly IRazorTemplateService _razorTemplateService;
+        private readonly ITemplateService _templateService;
         private readonly ICacheService _cacheService;
         private readonly IFileWriter _fileWriter;
 
-        public ControllerGeneratorService(ITableMetadataService tableMetadataService, IRazorTemplateService razorTemplateService, ICacheService cacheService, IFileWriter fileWriter)
+        public ControllerGeneratorService(ITableMetadataService tableMetadataService, ITemplateService templateService, ICacheService cacheService, IFileWriter fileWriter)
         {
             _tableMetadataService = tableMetadataService;
-            _razorTemplateService = razorTemplateService;
+            _templateService = templateService;
             _cacheService = cacheService;
             _fileWriter = fileWriter;
         }
@@ -39,7 +39,7 @@ namespace CodeGeneration.Services.Generation.Controller
             var options = context.ApplicationOptions.ControllerGeneration;
 
             var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(context.ApplicationOptions));
-            var embeddedResources = _razorTemplateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
+            var embeddedResources = _templateService.GetEmbeddedTemplateNames(options.TemplateDirectories, options.TemplateNames);
 
             foreach (var resource in embeddedResources)
             {
@@ -66,7 +66,7 @@ namespace CodeGeneration.Services.Generation.Controller
                     {
                         Logger.Info("[CACHE MISS]: Controller code for {0} NOT found in cache. Will process template and add to cache.", cacheKey);
 
-                        parsedContents = _razorTemplateService.Process(razorEngineKey, new ControllerTemplateModel(options.Namespace, tableMetadata));
+                        parsedContents = _templateService.Process(razorEngineKey, new ControllerTemplateModel(options.Namespace, tableMetadata));
                         _cacheService.Set(cacheKey, parsedContents);
                     }
 
@@ -98,7 +98,7 @@ namespace CodeGeneration.Services.Generation.Controller
 
         public string GetTemplate(string templateName, string templateDirectory = "")
         {
-            return _razorTemplateService.ResolveTemplate(templateName.ToRazorEngineKey(templateDirectory));
+            return _templateService.ResolveTemplate(templateName.ToRazorEngineKey(templateDirectory));
         }
     }
 }

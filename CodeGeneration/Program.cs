@@ -15,6 +15,8 @@ using CodeGeneration.Services.Generation.Sql;
 using CodeGeneration.Services.Generation.StaticFile;
 using CodeGeneration.Services.Generation.View;
 using CodeGeneration.Services.Process;
+using CodeGeneration.Services.Template;
+using CodeGeneration.Services.Template.Liquid;
 using CodeGeneration.Services.Template.Razor;
 using Microsoft.Extensions.Configuration;
 using NLog;
@@ -50,6 +52,7 @@ namespace CodeGeneration
             container.RegisterType<ProcessExecutorService>().As<IProcessExecutorService>().SingleInstance();
             container.RegisterType<SqlCommandExecutorService>().As<ISqlCommandExecutorService>().SingleInstance();
             container.RegisterType<RazorTemplateService>().As<IRazorTemplateService>().SingleInstance();
+            container.RegisterType<LiquidTemplateService>().As<ITemplateService>().SingleInstance();
             container.RegisterType<ControllerGeneratorService>().As<IControllerGeneratorService>().SingleInstance();
             container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();
             container.RegisterType<RepositoryGeneratorService>().As<IRepositoryGeneratorService>().SingleInstance();
