@@ -2,10 +2,9 @@
 @using CodeGeneration.Extensions
 @inherits RazorEngine.Templating.TemplateBase<CodeGeneration.Models.Template.TableMetadataTemplateModel>
 using System;
-using System.ComponentModel;
-using ControlPanel.Models.Pagination;
+using @(Model.TargetNamespace).Pagination;
 
-namespace @Model.TargetNamespace
+namespace @(Model.TargetNamespace).Domain
 {
     /// <summary>
     /// Author: @RazorEngineExtensions.Author()
@@ -17,8 +16,12 @@ namespace @Model.TargetNamespace
     {
     @foreach (var column in @Model.TableMetadata.Columns)
     {
-        @:@Raw(string.Format("[DisplayName(\"{0}\")]", column.ColumnName.ToUpperDelimited(" ")))
         @:@string.Format("public {0}{1} {2} {{ get; set; }}", SqlDataTypeConverter.GetTypeAsString(column.DataType), SqlDataTypeConverter.IsNullableType(column) ? "?" : "", column.ColumnName)
+    }
+
+    @foreach (var column in @Model.TableMetadata.Columns.Where(c => c.IsForeignKey))
+    {
+        @:@string.Format("public {0} {0} {{ get; set; }}", column.ColumnName.Replace("Id",""))
     }
     }
 }

@@ -2,6 +2,13 @@
 
 ## TODO
 
++ Add generation statistics such as number of files generated and LoC.
++ Replace Razor templates with something like Mustachio or Scriban. Razor is having too many issues with some of the syntax I'm using and it's making it
+very difficult to read my templates.
+	+ https://github.com/wildbit/mustachio
+	+ https://github.com/lunet-io/scriban
+	+ http://dotliquidmarkup.org/
+	+ https://github.com/rexm/Handlebars.Net
 + Add a better method to only run generation for certain tables.
   + Right now, I'm using a IncludeTables variable and filtering the complete list of tables after the fact...probably a better way to do this.
 + Create `MetadataModel` classes for each generator type to make templates for controllers, repositories, etc. easier to write.
