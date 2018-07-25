@@ -193,6 +193,7 @@
     <Compile Include="Services\Process\ISqlCommandExecutorService.cs" />
     <Compile Include="Services\Process\ProcessExecutorService.cs" />
     <Compile Include="Services\Process\SqlCommandExecutorService.cs" />
+    <Compile Include="Services\Template\BaseTemplateService.cs" />
     <Compile Include="Services\Template\Liquid\ILiquidTemplateService.cs" />
     <Compile Include="Services\Template\Liquid\LiquidTemplateService.cs" />
     <Compile Include="Services\Template\Razor\IRazorTemplateService.cs" />

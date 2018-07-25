@@ -11,8 +11,8 @@ namespace {{TargetNamespace}}.Domain
     /// </summary>
     public class {{ModelName}} : PagableModel
     {
-	{% for column in TableMetadata.Columns -%}
-		public {{column.data_type}} {{column.column_name}} { get; set; }
-	{% endfor -%}
-    }
+{% for column in TableMetadata.Columns -%}
+	public {{column.data_type}} {{column.column_name}} { get; set; }
+{% endfor -%}
+	}
 }
