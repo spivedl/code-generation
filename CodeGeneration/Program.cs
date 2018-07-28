@@ -8,6 +8,7 @@ using CodeGeneration.Services.Cache;
 using CodeGeneration.Services.Compiler;
 using CodeGeneration.Services.Data;
 using CodeGeneration.Services.File;
+using CodeGeneration.Services.Generation;
 using CodeGeneration.Services.Generation.Controller;
 using CodeGeneration.Services.Generation.Model;
 using CodeGeneration.Services.Generation.Repository;
@@ -55,6 +56,7 @@ namespace CodeGeneration
             container.RegisterType<LiquidTemplateService>().As<ITemplateService>().SingleInstance();
             container.RegisterType<ControllerGeneratorService>().As<IControllerGeneratorService>().SingleInstance();
             container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();
+            //container.RegisterType<ModelGeneratorService>().As<IModelGeneratorService>().SingleInstance();
             container.RegisterType<RepositoryGeneratorService>().As<IRepositoryGeneratorService>().SingleInstance();
             container.RegisterType<SqlGeneratorService>().As<ISqlGeneratorService>().SingleInstance();
             container.RegisterType<StaticFileGeneratorService>().As<IStaticFileGeneratorService>().SingleInstance();

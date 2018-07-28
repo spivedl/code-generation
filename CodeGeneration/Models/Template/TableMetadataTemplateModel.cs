@@ -1,10 +1,9 @@
 ﻿using CodeGeneration.Extensions;
 using CodeGeneration.Models.Metadata.Sql;
-using DotLiquid;
 
 namespace CodeGeneration.Models.Template
 {
-    public class TableMetadataTemplateModel : Drop
+    public class TableMetadataTemplateModel : TemplateModel
     {
         public string SourceConnectionKey { get; set; }
         public string TargetNamespace { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
+using CodeGeneration.Services.Generation;
 using CodeGeneration.Services.Generation.Controller;
 using CodeGeneration.Services.Generation.Model;
 using CodeGeneration.Services.Generation.Repository;
@@ -40,23 +41,91 @@ namespace CodeGeneration.Services.Boot
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var defaultGenerationContext = new GenerationContext { ApplicationOptions = _applicationOptions };
+            var generationContext = new GenerationContext { ApplicationOptions = _applicationOptions };
 
-            _controllerGeneratorService.Generate(defaultGenerationContext);
+            GenerateControllers(generationContext);
 
-            _modelGeneratorService.Generate(defaultGenerationContext);
+            var modelStats = GenerateModels(generationContext);
 
-            _repositoryGeneratorService.Generate(defaultGenerationContext);
+            GenerateRepositories(generationContext);
 
-            _sqlGeneratorService.Generate(defaultGenerationContext);
+            GenerateSql(generationContext);
 
-            _staticFileGeneratorService.Generate(defaultGenerationContext);
+            GenerateStaticFiles(generationContext);
 
-            _viewGeneratorService.Generate(defaultGenerationContext);
+            GenerateViews(generationContext);
 
             stopwatch.Stop();
 
             Logger.Info("Boot Service says goodbye! {0:g}", stopwatch.Elapsed);
+        }
+
+        private void GenerateControllers(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateControllers)
+            {
+                Logger.Info("Controller generation is disabled. Change the 'GenerateControllers' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
+            _controllerGeneratorService.Generate(context);
+        }
+
+        private GenerationStatistics GenerateModels(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateModels)
+            {
+                Logger.Info("Model generation is disabled. Change the 'GenerateModels' option in the 'appsettings.json' file to enable.");
+                return new GenerationStatistics { GenerationEnabled = false };
+            }
+
+            return _modelGeneratorService
+                .GenerateOutput(context)
+                .Report(Logger, "Model Generation completed with the following statistics:");
+        }
+
+        private void GenerateRepositories(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateRepositories)
+            {
+                Logger.Info("Repository generation is disabled. Change the 'GenerateRepositories' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
+            _repositoryGeneratorService.Generate(context);
+        }
+
+        private void GenerateSql(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateSql)
+            {
+                Logger.Info("SQL generation is disabled. Change the 'GenerateSql' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
+            _sqlGeneratorService.Generate(context);
+        }
+
+        private void GenerateStaticFiles(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateStaticFiles)
+            {
+                Logger.Info("Static File generation is disabled. Change the 'GenerateStaticFiles' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
+            _staticFileGeneratorService.Generate(context);
+        }
+
+        private void GenerateViews(GenerationContext context)
+        {
+            if (!_applicationOptions.GenerateViews)
+            {
+                Logger.Info("View generation is disabled. Change the 'GenerateViews' option in the 'appsettings.json' file to enable.");
+                return;
+            }
+
+            _viewGeneratorService.Generate(context);
         }
     }
 }

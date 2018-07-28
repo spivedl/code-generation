@@ -135,6 +135,8 @@
     <Compile Include="Models\Configuration\GenerationOptions.cs" />
     <Compile Include="Models\Configuration\SqlCommandOptions.cs" />
     <Compile Include="Models\Configuration\OutputOptions.cs" />
+    <Compile Include="Models\Context\GenerationStatistics.cs" />
+    <Compile Include="Models\Context\OutputContext.cs" />
     <Compile Include="Models\Context\GenerationContext.cs" />
     <Compile Include="Models\Context\TableMetadataContext.cs" />
     <Compile Include="Models\Metadata\Model\ViewModelMetadata.cs" />
@@ -151,6 +153,8 @@
     <Compile Include="Models\Template\ControllerTemplateModel.cs" />
     <Compile Include="Models\Template\StaticFileTemplateModel.cs" />
     <Compile Include="Models\Template\TableMetadataTemplateModel.cs" />
+    <Compile Include="Models\Template\TemplateModel.cs" />
+    <Compile Include="Models\Context\TemplateModelContext.cs" />
     <Compile Include="Modules\CachingModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -176,9 +180,11 @@
     <Compile Include="Services\File\FileWriter.cs" />
     <Compile Include="Services\File\IFileReader.cs" />
     <Compile Include="Services\File\IFileWriter.cs" />
+    <Compile Include="Services\Generation\BaseGeneratorService.cs" />
     <Compile Include="Services\Generation\Controller\ControllerGeneratorService.cs" />
     <Compile Include="Services\Generation\Controller\IControllerGeneratorService.cs" />
     <Compile Include="Services\Generation\IGeneratorService.cs" />
+    <Compile Include="Services\Generation\INewGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\IModelGeneratorService.cs" />
     <Compile Include="Services\Generation\Model\ModelGeneratorService.cs" />
     <Compile Include="Services\Generation\Repository\RepositoryGeneratorService.cs" />
@@ -207,16 +213,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <None Include="appsettings.controlpanel.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="appsettings.wl.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="appsettings.tempus.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="lib\sqlcmd.zip" />
@@ -242,7 +239,7 @@
     <EmbeddedResource Include="Templates\StaticFileGenerator\_Layout.cshtml" />
     <EmbeddedResource Include="Templates\StaticFileGenerator\ICrudRepository.cshtml" />
     <EmbeddedResource Include="Templates\ViewGenerator\_%24modelName%24Table.cshtml" />
-    <EmbeddedResource Include="Templates\ModelGenerator\%24modelName%24.txt" />
+    <EmbeddedResource Include="Templates\Model\{{modelName}}.txt" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>

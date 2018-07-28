@@ -59,5 +59,21 @@ namespace CodeGeneration.Extensions
         {
             return $"_{input.ToFirstCharLowerCase()}{type}";
         }
+
+        public static int CountLines(this string text)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+
+            var newLineLen = Environment.NewLine.Length;
+            var numLines = text.Length - text.Replace(Environment.NewLine, string.Empty).Length;
+
+            if (newLineLen != 0)
+            {
+                numLines /= newLineLen;
+                numLines++;
+            }
+
+            return numLines;
+        }
     }
 }
