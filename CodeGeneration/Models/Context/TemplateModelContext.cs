@@ -1,11 +1,11 @@
-﻿using CodeGeneration.Models.Metadata.Sql;
+﻿using CodeGeneration.Models.Configuration;
+using CodeGeneration.Models.Metadata.Sql;
 
 namespace CodeGeneration.Models.Context
 {
     public class TemplateModelContext
     {
-        public string ConnectionKey { get; set; }
-        public string TargetNamespace { get; set; }
+        public ApplicationOptions ApplicationOptions { get; set; }
         public TableMetadata TableMetadata { get; set; }
     }
 }

@@ -1,10 +1,13 @@
-﻿namespace CodeGeneration.Models.Metadata.Model
+﻿using DotLiquid;
+
+namespace CodeGeneration.Models.Metadata.Model
 {
-    public class PropertyMetadata
+    public class PropertyMetadata : Drop
     {
         public bool IsPrimaryKey { get; set; }
         public bool IsForeignKey { get; set; }
         public bool IsReadOnly { get; set; }
+        public bool IsNullableType { get; set; }
         public bool Scaffold { get; set; }
         public string PropertyName { get; set; }
         public string DisplayName { get; set; }

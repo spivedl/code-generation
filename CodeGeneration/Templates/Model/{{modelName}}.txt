@@ -1,18 +1,28 @@
 ﻿using System;
-using {{TargetNamespace}}.Pagination;
+using {{ModelNamespace}}.Pagination;
 
-namespace {{TargetNamespace}}.Domain
+namespace {{ModelNamespace}}.Domain
 {
     /// <summary>
-    /// Author: @RazorEngineExtensions.Author()
-    /// Version: @RazorEngineExtensions.Version()
-    /// Create Date: @DateTime.Now.ToString("f")
+    /// Author: {{Author}}
+    /// Version: {{Version}}
+    /// Create Date: {{Now}}
     /// Description: Auto-generated model for the {{TableName}} table.
     /// </summary>
-    public class {{ModelName}} : PagableModel
+    public class {{EntityName}} : PagableModel
     {
-{% for column in TableMetadata.Columns -%}
-	public {{column.data_type}} {{column.column_name}} { get; set; }
-{% endfor -%}
+{%- for property in PropertyMetadataSet -%}
+	{%- if property.IsNullableType -%}
+		public {{property.ShortTypeName}}? {{property.PropertyName}} { get; set; }
+	{%- else -%}
+		public {{property.ShortTypeName}} {{property.PropertyName}} { get; set; }
+	{%- endif -%}
+{%- endfor -%}
+
+{%- for property in PropertyMetadataSet -%}
+	{%- if property.IsForeignKey -%}
+		public {{ property.PropertyName | Remove: "Id" }} {{ property.PropertyName | Remove: "Id" }} { get; set; }
+	{%- endif -%}
+{%- endfor -%}
 	}
 }

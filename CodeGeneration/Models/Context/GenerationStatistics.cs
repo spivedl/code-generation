@@ -52,7 +52,7 @@ namespace CodeGeneration.Models.Context
             logger.Info("End Time: {0}", EndTime.ToLocalTime().ToString("s"));
             logger.Info("Duration: {0}", Duration.ToString("g"));
 
-            logger.Info("--------------------------------------------------------------------------------");\
+            logger.Info("--------------------------------------------------------------------------------");
 
             return this;
         }

@@ -151,6 +151,7 @@
     <Compile Include="Models\Metadata\Sql\RelationshipMetadata.cs" />
     <Compile Include="Models\Metadata\Sql\TableMetadata.cs" />
     <Compile Include="Models\Template\ControllerTemplateModel.cs" />
+    <Compile Include="Models\Template\ModelTemplateModel.cs" />
     <Compile Include="Models\Template\StaticFileTemplateModel.cs" />
     <Compile Include="Models\Template\TableMetadataTemplateModel.cs" />
     <Compile Include="Models\Template\TemplateModel.cs" />

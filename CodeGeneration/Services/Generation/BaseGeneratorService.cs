@@ -33,7 +33,6 @@ namespace CodeGeneration.Services.Generation
 
             var applicationOptions = context.ApplicationOptions;
             var generatorOptions = GetGeneratorOptions(context.ApplicationOptions);
-            var connectionKey = context.ApplicationOptions.SourceConnectionKey;
 
             var tableMetadataSet = _tableMetadataService.GetTableMetadata(new TableMetadataContext(applicationOptions));
             var embeddedResources = _templateService.GetEmbeddedTemplateNames(generatorOptions.TemplateDirectories, generatorOptions.TemplateNames);
@@ -55,8 +54,7 @@ namespace CodeGeneration.Services.Generation
                     // create model for template
                     var templateModel = GetTemplateModel(new TemplateModelContext
                     {
-                        ConnectionKey = connectionKey,
-                        TargetNamespace = generatorOptions.Namespace,
+                        ApplicationOptions = applicationOptions,
                         TableMetadata = tableMetadata
                     });
 

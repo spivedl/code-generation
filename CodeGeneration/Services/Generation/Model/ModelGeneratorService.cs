@@ -1,4 +1,5 @@
-﻿using CodeGeneration.Models.Configuration;
+﻿using CodeGeneration.Extensions;
+using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
 using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Data;
@@ -34,7 +35,7 @@ namespace CodeGeneration.Services.Generation.Model
 
         protected override TemplateModel GetTemplateModel(TemplateModelContext context)
         {
-            return new TableMetadataTemplateModel(context.ConnectionKey, context.TargetNamespace, context.TableMetadata);
+            return new ModelTemplateModel(context);
         }
     }
 }
