@@ -1,5 +1,4 @@
-﻿using CodeGeneration.Extensions;
-using CodeGeneration.Models.Configuration;
+﻿using CodeGeneration.Models.Configuration;
 using CodeGeneration.Models.Context;
 using CodeGeneration.Models.Template;
 using CodeGeneration.Services.Data;

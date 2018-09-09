@@ -1,8 +1,6 @@
-﻿using CodeGeneration.Models.Context;
-
-namespace CodeGeneration.Services.Generation.Controller
+﻿namespace CodeGeneration.Services.Generation.Controller
 {
-    public interface IControllerGeneratorService : IGeneratorService<GenerationContext>
+    public interface IControllerGeneratorService : INewGeneratorService
     {
     }
 }

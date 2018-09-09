@@ -1,0 +1,46 @@
+﻿using System;
+using System.Web.Mvc;
+using {{ModelNamespace}}.Domain;
+using {{ModelNamespace}}.Pagination;
+using {{ModelNamespace}}.View;
+
+namespace {{TargetNamespace}}
+{
+	/// <summary>
+    /// Author: {{Author}}
+    /// Version: {{Version}}
+    /// Create Date: {{Now}}
+    /// Description: Auto-generated controller for the {{EntityName}} model.
+    /// </summary>
+	public class {{ClassName}} : Controller
+	{
+		{%- capture repo_variable_name -%}{{EntityName | Downcase}}Repository{%- endcapture -%}
+		private readonly I{{EntityName}}Repository _{{repo_variable_name}};
+		{%- for column in ForeignKeyColumns -%}
+		{%- capture fk_var -%}{{column.ColumnName | Remove: "Id"}}{%- endcapture -%}
+		private readonly I{{fk_var}}Repository _{{fk_var | Downcase}}Repository;
+		{%- endfor -%}
+
+		public {{ClassName}}({{ConstructorParameters}})
+		{
+			_{{repo_variable_name}} = {{repo_variable_name}};
+			{%- for column in ForeignKeyColumns -%}
+			{%- capture fk_var -%}{{column.ColumnName | Remove: "Id"}}{%- endcapture -%}
+			_{{fk_var | Downcase}}Repository = {{fk_var | Downcase}}Repository;
+			{%- endfor -%}
+		}
+
+		private void PopulateSelectLists()
+		{
+			{%- for column in ForeignKeyColumns -%}
+			{%- capture fk_var -%}{{column.ColumnName | Remove: "Id"}}{%- endcapture -%}
+			ViewBag.{{fk_var}}List = _{{fk_var | Downcase}}Repository.FindAll().ToSelectListItems();
+			{%- endfor -%}
+		}
+
+		public ActionResult Index()
+		{
+			return View();
+		}
+	}
+}

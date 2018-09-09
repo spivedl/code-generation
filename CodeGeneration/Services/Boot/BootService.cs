@@ -68,7 +68,9 @@ namespace CodeGeneration.Services.Boot
                 return;
             }
 
-            _controllerGeneratorService.Generate(context);
+            _controllerGeneratorService
+                .GenerateOutput(context)
+                .Report(Logger, "Controller Generation completed with the following statistics:");
         }
 
         private GenerationStatistics GenerateModels(GenerationContext context)
